@@ -4,7 +4,7 @@
 using namespace std;
 
 int main(void) {
-	BTree<int> tree(1);
+	BTree<int> tree(3);
 	cout << "Hello B Tree!" << endl;
 
 	return 0;
