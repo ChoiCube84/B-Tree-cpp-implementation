@@ -1,8 +1,11 @@
 #include <iostream>
+#include "b_tree.h"
 
 using namespace std;
 
 int main(void) {
-	cout << "Long time no see B Tree!" << endl;
+	BTree<int> tree(1);
+	cout << "Hello B Tree!" << endl;
+
 	return 0;
 }
