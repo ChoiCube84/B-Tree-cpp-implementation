@@ -12,7 +12,7 @@ This project is implemented using Object-Oriented Programming (OOP) in C++, ensu
 # Features
 The B Tree implementation supports the following operations:
 
-1. Insertion: Add keys into the B Tree while maintaining its properties.
-2. Deletion: Remove keys from the B Tree while maintaining its properties.
-3. Search: Find if a key exists in the B Tree.
-4. Traversal: Traverse through the keys in the B Tree.
+1. Insertion: Add keys into the B Tree while maintaining its properties. (Not Implemented Yet)
+2. Deletion: Remove keys from the B Tree while maintaining its properties. (Not Implemented Yet)
+3. Search: Find if a key exists in the B Tree. (Not Implemented Yet)
+4. Traversal: Traverse through the keys in the B Tree. (Not Implemented Yet)
