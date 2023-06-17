@@ -20,12 +20,31 @@ public:
 		std::cout << "B Key List was destructed" << std::endl;
 	}
 
-	void insert(const T& key) {
-		std::cout << "Not Implemented yet" << std::endl;
+	int find(const T& key, int begin, int end) {
+		int middle = (begin + end) / 2;
+
+		if (begin > end) {
+			return -1;
+		} 
+		else if (keys[middle] == key) {
+			return middle;
+		}
+		else if (keys[middle] > key) {
+			return find(key, begin, middle - 1);
+		}
+		else {
+			return find(key, middle + 1, end);
+		}
 	}
 
-	void remove(const T& key) {
+	int insert(const T& key) {
 		std::cout << "Not Implemented yet" << std::endl;
+		return 0;
+	}
+
+	int remove(const T& key) {
+		std::cout << "Not Implemented yet" << std::endl;
+		return 0;
 	}
 
 	T& operator[](int idx) {
@@ -44,7 +63,7 @@ public:
 		return result;
 	}
 
-	const size_t getCurrentSize() const { return currentSize;  }
+	const size_t getCurrentSize() const { return currentSize; }
 };
 
 #endif // !__B_KEY_LIST__
