@@ -9,9 +9,23 @@ class BKeyList
 {
 private:
 	T* keys;
+	size_t order;
 	size_t currentSize;
+
+	bool insert(const T& key, size_t idx) {
+		if (currentSize == order) return false;
+
+		T temp = keys[idx];
+		for (size_t i = idx; i < currentSize; i++) {
+			swap(temp, keys[i + 1]);
+		}
+		currentSize++;
+		keys[idx] = key;
+		
+		return true;
+	}
 public:
-	BKeyList(size_t order) : keys(new T[order - 1]), currentSize(0)
+	BKeyList(size_t order) : keys(new T[order - 1]), order(order), currentSize(0)
 	{
 		std::cout << "B Key List was made" << std::endl;
 	}
@@ -20,8 +34,8 @@ public:
 		std::cout << "B Key List was destructed" << std::endl;
 	}
 
-	int find(const T& key, int begin, int end) {
-		int middle = (begin + end) / 2;
+	int findKeyIndex(const T& key, size_t begin, size_t end) {
+		size_t middle = (begin + end) / 2;
 
 		if (begin > end) {
 			return -1;
@@ -35,6 +49,10 @@ public:
 		else {
 			return find(key, middle + 1, end);
 		}
+	}
+
+	int findInsertIndex(const T& key, size_t begin, size_t end) {
+		return -1;
 	}
 
 	int insert(const T& key) {

@@ -4,9 +4,13 @@
 using namespace std;
 
 int main(void) {
-	BKeyList<int> node(3);
+	BKeyList<int> list(3);
 
-	cout << "Hello B Key List!" << endl;
+	list.insert(3);
+	list.insert(1);
+	list.insert(2);
+
+	cout << list.traverse() << endl;
 
 	return 0;
 }
