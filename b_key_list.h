@@ -15,15 +15,30 @@ private:
 	bool insert(const T& key, size_t idx) {
 		if (currentSize == order) return false;
 
-		T temp = keys[idx];
+		T prev = keys[idx];
 		for (size_t i = idx; i < currentSize; i++) {
-			swap(temp, keys[i + 1]);
+			T temp = prev;
+			prev = keys[i + 1];
+			keys[i + 1] = temp;
+			// swap(prev, keys[i + 1]);
 		}
 		currentSize++;
 		keys[idx] = key;
 		
 		return true;
 	}
+
+	bool remove(const T& key, size_t idx) {
+		if (keys[idx] != key) return false;
+
+		currentSize--;
+		for (size_t i = idx; i < currentSize; i++) {
+			keys[i] = keys[i + 1];
+		}
+		
+		return true;
+	}
+
 public:
 	BKeyList(size_t order) : keys(new T[order - 1]), order(order), currentSize(0)
 	{
@@ -34,35 +49,56 @@ public:
 		std::cout << "B Key List was destructed" << std::endl;
 	}
 
-	int findKeyIndex(const T& key, size_t begin, size_t end) {
+
+	// TODO: Verify if findIndex works properly
+
+	size_t findIndex(const T& key, size_t begin, size_t end) { 
 		size_t middle = (begin + end) / 2;
 
-		if (begin > end) {
-			return -1;
-		} 
-		else if (keys[middle] == key) {
-			return middle;
+		if (begin >= end) {
+			if (keys[end] < key) return end + 1;
+			else return end;
 		}
-		else if (keys[middle] > key) {
-			return find(key, begin, middle - 1);
+		else if (keys[middle] < key) {
+			return findIndex(key, middle + 1, end);
 		}
 		else {
-			return find(key, middle + 1, end);
+			return findIndex(key, begin, middle);
 		}
-	}
-
-	int findInsertIndex(const T& key, size_t begin, size_t end) {
-		return -1;
 	}
 
 	int insert(const T& key) {
-		std::cout << "Not Implemented yet" << std::endl;
-		return 0;
+		size_t keyIndex = 0;
+		if (currentSize > 0) keyIndex = findIndex(key, 0, currentSize - 1);
+		std::cout << "Index of the Key: " << keyIndex << std::endl;
+
+		if (insert(key, keyIndex)) {
+			std::cout << "Insert Success" << std::endl;
+			std::cout << "Current status: " << traverse() << std::endl;
+			return keyIndex;
+		}
+		else {
+			std::cout << "Insert Failed" << std::endl;
+			std::cout << "Current status: " << traverse() << std::endl;
+			return -1;
+		}
 	}
 
 	int remove(const T& key) {
-		std::cout << "Not Implemented yet" << std::endl;
-		return 0;
+		size_t keyIndex = 0;
+		if (currentSize > 0) keyIndex = findIndex(key, 0, currentSize - 1);
+		std::cout << "Index of the Key: " << keyIndex << std::endl;
+
+		if (remove(key, keyIndex)) {
+			std::cout << "Removal Success" << std::endl; 
+			std::cout << "Current status: " << traverse() << std::endl;
+			return keyIndex;
+		}
+		else {
+			std::cout << "Removal Failed" << std::endl;
+			std::cout << "Current status: " << traverse() << std::endl;
+			return -1;
+		}
 	}
 
 	T& operator[](int idx) {
