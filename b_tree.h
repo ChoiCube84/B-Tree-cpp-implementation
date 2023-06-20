@@ -18,9 +18,9 @@ private:
 
 		if (curr == nullptr) return result;
 
-		result += curr->keys->traverse();
+		result += curr->getKeys()->traverse();
 		for (size_t i = 0; i < order; i++) {
-			BNode<T>* temp = curr->children[i];
+			BNode<T>* temp = curr->getChildren()[i];
 			if (temp != nullptr) result += preOrder(temp);
 		}
 
@@ -30,12 +30,12 @@ private:
 	std::string inOrder(BNode<T>* curr) {
 		std::string result = "";
 		
-		size_t currentSize = curr->keys->getCurrentSize();
+		size_t currentSize = curr->getKeys()->getCurrentSize();
 		for (size_t i = 0; i < currentSize; i++) {
-			BNode<T>* temp = curr->children[i];
+			BNode<T>* temp = curr->getChildren()[i];
 
 			if (temp != nullptr) result += inOrder(temp);
-			result += curr->keys[i];
+			result += curr->getKeys()[i];
 		}
 
 		return result;
@@ -47,16 +47,16 @@ private:
 		if (curr == nullptr) return result;
 
 		for (size_t i = 0; i < order; i++) {
-			BNode<T>* temp = curr->children[i];
+			BNode<T>* temp = curr->getChildren()[i];
 			if (temp != nullptr) result += postOrder(temp);
 		}
-		result += curr->keys->traverse();
+		result += curr->getKeys()->traverse();
 
 		return result;
 	}
 
 public:
-	BTree(size_t order) : order(order), root(new BNode<T>(order))
+	BTree(size_t order) : order(order), root(new BNode<T>(order, true))
 	{
 		std::cout << "B Tree was made" << std::endl;
 	}

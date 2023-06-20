@@ -13,19 +13,19 @@ private:
 	size_t currentSize;
 
 	bool insert(const T& key, size_t idx) {
-		if (currentSize == order) return false;
-
-		T prev = keys[idx];
-		for (size_t i = idx; i < currentSize; i++) {
-			T temp = prev;
-			prev = keys[i + 1];
-			keys[i + 1] = temp;
-			// swap(prev, keys[i + 1]);
+		if (currentSize < order) {
+			T prev = keys[idx];
+			for (size_t i = idx; i < currentSize; i++) {
+				T temp = prev;
+				prev = keys[i + 1];
+				keys[i + 1] = temp;
+				// swap(prev, keys[i + 1]);
+			}
+			keys[idx] = key;
+			currentSize++;
 		}
-		currentSize++;
-		keys[idx] = key;
-		
-		return true;
+		if (currentSize < order) return false;
+		else return true;
 	}
 
 	bool remove(const T& key, size_t idx) {
@@ -40,7 +40,7 @@ private:
 	}
 
 public:
-	BKeyList(size_t order) : keys(new T[order - 1]), order(order), currentSize(0)
+	BKeyList(size_t order) : keys(new T[order]), order(order), currentSize(0)
 	{
 		std::cout << "B Key List was made" << std::endl;
 	}
@@ -67,20 +67,19 @@ public:
 		}
 	}
 
-	int insert(const T& key) {
+	bool insert(const T& key) {
 		size_t keyIndex = 0;
 		if (currentSize > 0) keyIndex = findIndex(key, 0, currentSize - 1);
 		std::cout << "Index of the Key: " << keyIndex << std::endl;
 
 		if (insert(key, keyIndex)) {
-			std::cout << "Insert Success" << std::endl;
+			std::cout << "Split Required" << std::endl;
 			std::cout << "Current status: " << traverse() << std::endl;
-			return keyIndex;
+			return true;
 		}
 		else {
-			std::cout << "Insert Failed" << std::endl;
 			std::cout << "Current status: " << traverse() << std::endl;
-			return -1;
+			return false;
 		}
 	}
 

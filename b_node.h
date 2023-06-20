@@ -4,15 +4,34 @@
 #include "b_key_list.h"
 
 template <typename T>
-struct BNode
+class BNode
 {
+private:
 	BKeyList<T>* keys;
 	BNode** children;
 	size_t order;
+	bool isLeaf;
 
-	BNode(size_t order) : keys(new BKeyList<T>(order)), children(nullptr), order(order)
+public:
+	BNode(size_t order, bool isLeaf = false, T* key = nullptr, BNode* first = nullptr, BNode* second = nullptr) : keys(new BKeyList<T>(order)), order(order), isLeaf(isLeaf)
 	{
-		std::cout << "B Node was made" << std::endl;
+		if (isLeaf) {
+			children = nullptr;
+			std::cout << "B Node was made: This is leaf node" << std::endl;
+		}
+		else {
+			children = new BNode*[order];
+			children[0] = first;
+			children[1] = second;
+
+			for (int i = 2; i < order; i++) {
+				children[i] = nullptr;
+			}
+
+			keys->insert(*key);
+
+			std::cout << "B Node was made" << std::endl;
+		}
 	}
 	~BNode()
 	{
@@ -26,6 +45,36 @@ struct BNode
 		}
 
 		std::cout << "B Node was destructed" << std::endl;
+	}
+
+	BNode** getChildren() { return children; }
+	BKeyList<T>* getKeys() { return keys; }
+
+	bool insert(const T& key) {
+		int index = keys->findIndex(key);
+		bool splitRequired = false;
+
+		if (isLeaf) {
+			splitRequired = keys->insert(key);
+		}
+		else {
+			BNode* child = children[index];
+			splitRequired = child->insert(key);
+		}
+
+		if (splitRequired) {
+			// TODO: Implented splitting
+		}
+		else {
+			// lorem ipsum
+		}
+
+		std::cout << "Not Implemented yet" << std::endl;
+		return false;
+	}
+
+	void remove() {
+		std::cout << "Not Implemented yet" << std::endl;
 	}
 };
 
