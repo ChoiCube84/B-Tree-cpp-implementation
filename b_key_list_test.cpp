@@ -4,21 +4,26 @@
 using namespace std;
 
 int main(void) {
-	BKeyList<int> list(10);
+	BKeyList<int>* first = new BKeyList<int>(10);
 
-	list.insert(4);
-	list.insert(7);
-	list.insert(3);
-	list.insert(6);
-	list.insert(2);
-	list.insert(5);
-	list.insert(1);
-	list.insert(6);
-	list.insert(2);
-	list.insert(5);
-	list.insert(1);
+	first->insert(4);
+	first->insert(7);
+	first->insert(3);
+	first->insert(6);
+	first->insert(2);
+	first->insert(5);
+	first->insert(1);
+	first->insert(9);
+	first->insert(10);
+	first->insert(8);
 
-	cout << list.traverse() << endl;
+	cout << "Insert complete" << endl;
+
+	BKeyList<int>* second = first->split();
+	cout << first->traverse() << " | " << second->traverse() << endl;
+
+	delete first;
+	delete second;
 
 	return 0;
 }

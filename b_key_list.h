@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <string>
+#include <sstream>
 
 template<typename T>
 class BKeyList 
@@ -39,20 +40,9 @@ private:
 		return true;
 	}
 
-public:
-	BKeyList(size_t order) : keys(new T[order]), order(order), currentSize(0)
-	{
-		std::cout << "B Key List was made" << std::endl;
-	}
-	~BKeyList() {
-		delete[] keys;
-		std::cout << "B Key List was destructed" << std::endl;
-	}
-
-
 	// TODO: Verify if findIndex works properly
-
-	size_t findIndex(const T& key, size_t begin, size_t end) { 
+	// TODO: Make this function not use recursion 
+	size_t findIndex(const T& key, size_t begin, size_t end) {
 		size_t middle = (begin + end) / 2;
 
 		if (begin >= end) {
@@ -67,9 +57,23 @@ public:
 		}
 	}
 
+public:
+	BKeyList(size_t order) : keys(new T[order]), order(order), currentSize(0)
+	{
+		std::cout << "B Key List was made" << std::endl;
+	}
+	~BKeyList() {
+		delete[] keys;
+		std::cout << "B Key List was destructed" << std::endl;
+	}
+
+	size_t findIndex(const T& key) {
+		return findIndex(key, 0, currentSize - 1);
+	}
+
 	bool insert(const T& key) {
 		size_t keyIndex = 0;
-		if (currentSize > 0) keyIndex = findIndex(key, 0, currentSize - 1);
+		if (currentSize > 0) keyIndex = findIndex(key);
 		std::cout << "Index of the Key: " << keyIndex << std::endl;
 
 		if (insert(key, keyIndex)) {
@@ -100,6 +104,20 @@ public:
 		}
 	}
 
+	BKeyList* split() {
+		if (currentSize < order) return nullptr;
+		else {
+			BKeyList* tail = new BKeyList(order);
+			
+			currentSize = order / 2;
+			for (int i = order / 2 + 1; i < order; i++) {
+				tail->insert(keys[i]);
+			}
+
+			return tail;
+		}
+	}
+
 	T& operator[](int idx) {
 		return keys[idx];
 	}
@@ -109,11 +127,12 @@ public:
 	}
 
 	std::string traverse() {
-		std::string result = "";
+		std::stringstream ss;
 		for (size_t i = 0; i < currentSize; i++) {
-			result += std::to_string(keys[i]) + " ";
+			if (i != 0) ss << " ";
+			ss << keys[i];
 		}
-		return result;
+		return ss.str();
 	}
 
 	const size_t getCurrentSize() const { return currentSize; }

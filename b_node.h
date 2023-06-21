@@ -54,16 +54,32 @@ public:
 		int index = keys->findIndex(key);
 		bool splitRequired = false;
 
+		BNode* child = nullptr;
+
 		if (isLeaf) {
 			splitRequired = keys->insert(key);
 		}
 		else {
-			BNode* child = children[index];
+			child = children[index];
 			splitRequired = child->insert(key);
 		}
 
 		if (splitRequired) {
 			// TODO: Implented splitting
+			if (isLeaf) {
+				return true;
+			}
+			else {
+				T promoted = child->keys[order / 2];
+				int index = keys->findIndex(promoted);
+
+				splitRequired = keys->insert(promoted);
+				
+				BKeyList<T>* temp = keys->split();
+				for (int i = index + 1; i < keys->getCurrentSize(); i++) {
+					// Push children to back
+				}
+			}
 		}
 		else {
 			// lorem ipsum
