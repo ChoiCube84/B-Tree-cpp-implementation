@@ -20,11 +20,11 @@ public:
 			std::cout << "B Node was made: This is leaf node" << std::endl;
 		}
 		else {
-			children = new BNode*[order];
+			children = new BNode*[order + 1];
 			children[0] = first;
 			children[1] = second;
 
-			for (int i = 2; i < order; i++) {
+			for (int i = 2; i < order + 1; i++) {
 				children[i] = nullptr;
 			}
 
@@ -33,6 +33,23 @@ public:
 			std::cout << "B Node was made" << std::endl;
 		}
 	}
+
+	BNode(size_t order, BKeyList<T>* keys, bool isLeaf) : order(order), keys(keys), isLeaf(isLeaf)
+	{
+		if (isLeaf) {
+			children = nullptr;
+			std::cout << "B Node was splitted: This is leaf node" << std::endl;
+		}
+		else {
+			children = new BNode*[order + 1];
+			for (int i = 0; i < order + 1; i++) {
+				children[i] = nullptr;
+			}
+
+			std::cout << "B Node was splitted" << std::endl;
+		}
+	}
+
 	~BNode()
 	{
 		delete keys;
@@ -50,7 +67,25 @@ public:
 	BNode** getChildren() { return children; }
 	BKeyList<T>* getKeys() { return keys; }
 
+	BNode* split() {
+		if (keys->getCurrentSize() < order) return nullptr;
+		else {
+			BNode* tail = new BNode(order, keys->split(), isLeaf);
+
+			currentSize = order / 2;
+
+			for (int i = order / 2 + 1; i < order; i++) {
+				tail->children[i] = 
+			}
+
+			return tail;
+		}
+	}
+
 	bool insert(const T& key) {
+		// std::cout << "Not Implemented yet" << std::endl;
+		// return false;
+
 		int index = keys->findIndex(key);
 		bool splitRequired = false;
 
@@ -65,28 +100,26 @@ public:
 		}
 
 		if (splitRequired) {
-			// TODO: Implented splitting
 			if (isLeaf) {
 				return true;
 			}
 			else {
 				T promoted = child->keys[order / 2];
-				int index = keys->findIndex(promoted);
-
-				splitRequired = keys->insert(promoted);
 				
+				int index = keys->findIndex(promoted);
+				splitRequired = keys->insert(promoted); // We should return this value
 				BKeyList<T>* temp = keys->split();
-				for (int i = index + 1; i < keys->getCurrentSize(); i++) {
-					// Push children to back
+
+				for (int i = keys->getCurrentSize(); i > index + 1; i--) {
+					children[i] = children[i - 1];
 				}
+				children[index + 1] = temp;
+				return splitRequired;
 			}
 		}
 		else {
-			// lorem ipsum
+			return false;
 		}
-
-		std::cout << "Not Implemented yet" << std::endl;
-		return false;
 	}
 
 	void remove() {
