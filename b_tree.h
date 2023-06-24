@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <string>
+#include <sstream>
 
 #include "b_node.h"
 
@@ -14,45 +15,45 @@ private:
 	BNode<T>* root;
 
 	std::string preOrder(BNode<T>* curr) {
-		std::string result = "";
+		std::stringstream ss;
 
-		if (curr == nullptr) return result;
-
-		result += curr->getKeys()->traverse();
-		for (size_t i = 0; i < order; i++) {
-			BNode<T>* temp = curr->getChildren()[i];
-			if (temp != nullptr) result += preOrder(temp);
+		if (curr != nullptr) {
+			ss << curr->getKeys()->traverse();
+			for (size_t i = 0; i < order; i++) {
+				BNode<T>* temp = curr->getChildren()[i];
+				if (temp != nullptr) ss << preOrder(temp);
+			}
 		}
-
-		return result;
+		
+		return ss.str();
 	}
 
 	std::string inOrder(BNode<T>* curr) {
-		std::string result = "";
+		std::stringstream ss;
 		
 		size_t currentSize = curr->getKeys()->getCurrentSize();
 		for (size_t i = 0; i < currentSize; i++) {
 			BNode<T>* temp = curr->getChildren()[i];
 
-			if (temp != nullptr) result += inOrder(temp);
-			result += curr->getKeys()[i];
+			if (temp != nullptr) ss << inOrder(temp);
+			ss << curr->getKeys()[i];
 		}
 
-		return result;
+		return ss.str();
 	}
 
 	std::string postOrder(BNode<T>* curr) {
-		std::string result = "";
+		std::stringstream ss;
 
-		if (curr == nullptr) return result;
-
-		for (size_t i = 0; i < order; i++) {
-			BNode<T>* temp = curr->getChildren()[i];
-			if (temp != nullptr) result += postOrder(temp);
+		if (curr != nullptr) {
+			for (size_t i = 0; i < order; i++) {
+				BNode<T>* temp = curr->getChildren()[i];
+				if (temp != nullptr) ss << postOrder(temp);
+			}
+			ss << curr->getKeys()->traverse();
 		}
-		result += curr->getKeys()->traverse();
 
-		return result;
+		return ss.str();
 	}
 
 public:
