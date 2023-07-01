@@ -1,44 +1,61 @@
 #include <iostream>
+#include <vector>
+
 #include "b_key_list.h"
 
 using namespace std;
 
-void printStatus(BKeyList<int>* list);
-void insertAndPrint(BKeyList<int>* list, int key);
+template <typename T>
+void insertAndPrint(BKeyList<T>* list, T key) {
+	cout << "Current status: " << list->traverse() << endl;
+	list->insert(key);
+	
+	if (list->splitRequired()) {
+		cout << "Split Required" << endl;
+	}
+
+	cout << endl;
+}
+
+template <typename T>
+void deleteAndPrint(BKeyList<T>* list, T key) {
+	cout << "Current status: " << list->traverse() << endl;
+
+	int check = list->remove(key);
+	
+	if (check == -1) {
+		std::cout << "Deletion Success" << std::endl;
+	}
+	else {
+		std::cout << "Deletion Failed" << std::endl;
+	}
+	
+	cout << endl;
+}
 
 int main(void) {
-	BKeyList<int>* first = new BKeyList<int>(10);
 
-	insertAndPrint(first, 4);
-	insertAndPrint(first, 7);
-	insertAndPrint(first, 3);
-	insertAndPrint(first, 6);
-	insertAndPrint(first, 2);
-	insertAndPrint(first, 5);
-	insertAndPrint(first, 1);
-	insertAndPrint(first, 9);
-	insertAndPrint(first, 10);
-	insertAndPrint(first, 8);
+	vector<int> keys = { 4, 7, 3, 6, 2, 5, 1, 9, 10, 8, 11 };
+	BKeyList<int>* first = new BKeyList<int>(keys.size());
+
+	for (auto i : keys) {
+		insertAndPrint<int>(first, i);
+	}
 
 	cout << "Insert complete" << endl;
 
 	BKeyList<int>* second = first->split();
 	cout << first->traverse() << " | " << second->traverse() << endl;
 
-	delete first;
 	delete second;
 
-	return 0;
-}
+	keys = { 3, 2, 5, 5, 1, 4 };
 
-void printStatus(BKeyList<int>* list) {
-	if (list->splitRequired()) {
-		cout << "Split Required" << endl;
+	for (auto i : keys) {
+		deleteAndPrint<int>(first, i);
 	}
-	cout << "Current status: " << list->traverse() << endl;
-}
 
-void insertAndPrint(BKeyList<int>* list, int key) {
-	list->insert(key);
-	printStatus(list);
+	delete first;
+
+	return 0;
 }

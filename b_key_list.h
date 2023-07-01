@@ -9,11 +9,13 @@ template<typename T>
 class BKeyList 
 {
 private:
-	T* keys;
-	size_t order;
+
+	T* keys;			// An array that holds the keys
+	size_t order;		// The order of B-Tree
 	size_t currentSize; // Number of keys in the list currently
 
-	void insert(const T& key, size_t idx) {
+	// Insert a key in a specific index
+	void insert(const T& key, size_t idx) { 
 		if (currentSize < order) {
 			T prev = keys[idx];
 
@@ -28,76 +30,87 @@ private:
 		}
 	}
 
+	// Remove a key from a specific index and return success
 	bool remove(const T& key, size_t idx) {
-		if (keys[idx] != key) return false;
-
-		currentSize--;
-		for (size_t i = idx; i < currentSize; i++) {
-			keys[i] = keys[i + 1];
+		if (keys[idx] != key) {
+			return false;
 		}
-		
-		return true;
-	}
 
-	// TODO: Verify if findIndex works properly
-	// TODO: Make this function not use recursion 
-	size_t findIndex(const T& key, size_t begin, size_t end) {
-		size_t middle = (begin + end) / 2;
-
-		if (begin >= end) {
-			if (keys[end] < key) return end + 1;
-			else return end;
-		}
-		else if (keys[middle] < key) {
-			return findIndex(key, middle + 1, end);
-		}
 		else {
-			return findIndex(key, begin, middle);
+			currentSize--;
+
+			for (size_t i = idx; i < currentSize; i++) {
+				keys[i] = keys[i + 1];
+			}
+
+			return true;
 		}
 	}
 
 public:
+	
+	// Initializer of BKeyList
 	BKeyList(size_t order) : keys(new T[order]), order(order), currentSize(0)
 	{
 		std::cout << "B Key List was made" << std::endl;
 	}
+
+	// Destructor of BKeyList
 	~BKeyList() {
 		delete[] keys;
 		std::cout << "B Key List was destructed" << std::endl;
 	}
 
+	// Find and return the index of a key
 	size_t findIndex(const T& key) {
-		return findIndex(key, 0, currentSize - 1);
+		size_t begin = 0;
+		size_t end = currentSize - 1;
+		
+		while (begin < end) {
+			size_t middle = (begin + end) / 2;
+			if (keys[middle] < key) {
+				begin = middle + 1;
+			}
+			else {
+				end = middle;
+			}
+		}
+
+		size_t result = end;
+		
+		if (keys[end] < key) 
+			result++;
+		
+		std::cout << "Index of the Key: " << result << std::endl; // For debugging
+
+		return result;
 	}
 
+	// Insert a key while maintaining the order
 	void insert(const T& key) {
 		size_t keyIndex = 0;
 		if (currentSize > 0) keyIndex = findIndex(key);
 		
-		std::cout << "Index of the Key: " << keyIndex << std::endl; // For debugging
-		
 		insert(key, keyIndex);
 	}
 
+	// Delete a key while maintaining the order
 	int remove(const T& key) {
 		size_t keyIndex = 0;
-		if (currentSize > 0) keyIndex = findIndex(key, 0, currentSize - 1);
-		std::cout << "Index of the Key: " << keyIndex << std::endl;
+		if (currentSize > 0) keyIndex = findIndex(key);
 
-		if (remove(key, keyIndex)) {
-			std::cout << "Removal Success" << std::endl; 
-			std::cout << "Current status: " << traverse() << std::endl;
-			return keyIndex;
+		if (keyIndex < currentSize && remove(key, keyIndex)) {
+			return -1;
 		}
 		else {
-			std::cout << "Removal Failed" << std::endl;
-			std::cout << "Current status: " << traverse() << std::endl;
-			return -1;
+			return keyIndex;
 		}
 	}
 
+	// Check if this BKeyList should be splitted
 	bool splitRequired() {	return currentSize >= order; }
 
+	// Split this BKeyList and return the tail part
 	BKeyList* split() {
 		if (currentSize < order) return nullptr;
 		else {
@@ -112,6 +125,7 @@ public:
 		}
 	}
 
+	// Access to the key value by using [] operator
 	T& operator[](int idx) {
 		return keys[idx];
 	}
@@ -120,6 +134,7 @@ public:
 		return keys[idx];
 	}
 
+	// Returns the string of traverse of this BKeyList
 	std::string traverse() {
 		std::stringstream ss;
 		for (size_t i = 0; i < currentSize; i++) {
@@ -129,6 +144,7 @@ public:
 		return ss.str();
 	}
 
+	// Returns the number of keys inside this BKeyList
 	const size_t getCurrentSize() const { return currentSize; }
 };
 
