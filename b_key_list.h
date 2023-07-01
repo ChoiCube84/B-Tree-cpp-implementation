@@ -11,22 +11,21 @@ class BKeyList
 private:
 	T* keys;
 	size_t order;
-	size_t currentSize;
+	size_t currentSize; // Number of keys in the list currently
 
-	bool insert(const T& key, size_t idx) {
+	void insert(const T& key, size_t idx) {
 		if (currentSize < order) {
 			T prev = keys[idx];
+
 			for (size_t i = idx; i < currentSize; i++) {
 				T temp = prev;
 				prev = keys[i + 1];
 				keys[i + 1] = temp;
-				// swap(prev, keys[i + 1]);
 			}
+
 			keys[idx] = key;
 			currentSize++;
 		}
-		if (currentSize < order) return false;
-		else return true;
 	}
 
 	bool remove(const T& key, size_t idx) {
@@ -71,20 +70,13 @@ public:
 		return findIndex(key, 0, currentSize - 1);
 	}
 
-	bool insert(const T& key) {
+	void insert(const T& key) {
 		size_t keyIndex = 0;
 		if (currentSize > 0) keyIndex = findIndex(key);
-		std::cout << "Index of the Key: " << keyIndex << std::endl;
-
-		if (insert(key, keyIndex)) {
-			std::cout << "Split Required" << std::endl;
-			std::cout << "Current status: " << traverse() << std::endl;
-			return true;
-		}
-		else {
-			std::cout << "Current status: " << traverse() << std::endl;
-			return false;
-		}
+		
+		std::cout << "Index of the Key: " << keyIndex << std::endl; // For debugging
+		
+		insert(key, keyIndex);
 	}
 
 	int remove(const T& key) {
@@ -103,6 +95,8 @@ public:
 			return -1;
 		}
 	}
+
+	bool splitRequired() {	return currentSize >= order; }
 
 	BKeyList* split() {
 		if (currentSize < order) return nullptr;

@@ -3,19 +3,22 @@
 
 using namespace std;
 
+void printStatus(BKeyList<int>* list);
+void insertAndPrint(BKeyList<int>* list, int key);
+
 int main(void) {
 	BKeyList<int>* first = new BKeyList<int>(10);
 
-	first->insert(4);
-	first->insert(7);
-	first->insert(3);
-	first->insert(6);
-	first->insert(2);
-	first->insert(5);
-	first->insert(1);
-	first->insert(9);
-	first->insert(10);
-	first->insert(8);
+	insertAndPrint(first, 4);
+	insertAndPrint(first, 7);
+	insertAndPrint(first, 3);
+	insertAndPrint(first, 6);
+	insertAndPrint(first, 2);
+	insertAndPrint(first, 5);
+	insertAndPrint(first, 1);
+	insertAndPrint(first, 9);
+	insertAndPrint(first, 10);
+	insertAndPrint(first, 8);
 
 	cout << "Insert complete" << endl;
 
@@ -26,4 +29,16 @@ int main(void) {
 	delete second;
 
 	return 0;
+}
+
+void printStatus(BKeyList<int>* list) {
+	if (list->splitRequired()) {
+		cout << "Split Required" << endl;
+	}
+	cout << "Current status: " << list->traverse() << endl;
+}
+
+void insertAndPrint(BKeyList<int>* list, int key) {
+	list->insert(key);
+	printStatus(list);
 }
