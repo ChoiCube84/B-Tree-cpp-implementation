@@ -49,7 +49,7 @@ private:
 
 public:
 	
-	// Initializer of BKeyList
+	// Constructor of BKeyList
 	BKeyList(size_t order) : keys(new T[order]), order(order), currentSize(0)
 	{
 		std::cout << "B Key List was made" << std::endl;
