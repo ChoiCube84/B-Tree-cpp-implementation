@@ -7,14 +7,14 @@ template <typename T>
 class BNode
 {
 private:
-	BKeyList<T>* keys;
-	// BNode* parent;
-	BNode** children;
-	size_t order;
-	bool isLeaf;
+	BKeyList<T>* keys; // A pointer that points to a BKeyList holding the keys of this node
+	BNode* parent;	   // A pointer that points to the parent node
+	BNode** children;  // An array of pointers that point to each child node
+	size_t order;	   // The order of this B-Tree
+	bool isLeaf;	   // Indicator of whether this node is a leaf node
 
 	BNode* split() {
-		BNode* tail = new BNode(order, keys->split(), isLeaf);
+		BNode* tail = new BNode(order, parent, keys->split(), isLeaf);
 
 		currentSize = order / 2;
 
@@ -29,7 +29,7 @@ private:
 public:
 
 	// Basic constructor of BNode
-	BNode(size_t order, bool isLeaf = false) : keys(new BKeyList<T>(order)), order(order), isLeaf(isLeaf)
+	BNode(size_t order, BNode* parent, bool isLeaf = false) : keys(new BKeyList<T>(order)), order(order), parent(parent), isLeaf(isLeaf)
 	{
 		if (isLeaf) {
 			children = nullptr;
@@ -47,6 +47,7 @@ public:
 	// Constructor of BNode for making a new root node
 	BNode(size_t order, BNode* first, BNode* second) : keys(new BKeyList<T>(order)), order(order), isLeaf(false)
 	{
+		parent = nullptr;
 		children = new BNode * [order + 1];
 
 		children[0] = first;
@@ -60,7 +61,7 @@ public:
 	}
 
 	// Constructor of BNode for making a splitted node
-	BNode(size_t order, BKeyList<T>* keys, bool isLeaf) : order(order), keys(keys), isLeaf(isLeaf)
+	BNode(size_t order, BNode* parent, BKeyList<T>* keys, bool isLeaf) : order(order), keys(keys), isLeaf(isLeaf)
 	{
 		if (isLeaf) {
 			children = nullptr;
@@ -113,9 +114,23 @@ public:
 		bool splitRequired = keys->splitRequired();
 
 		if (splitRequired) {
-			// Should determine if this is root node or not
-			// Split the node
-			// If this is root node, make new root node
+			if (parent == nullptr) {
+				 // Handle when it is root node
+			}
+			else {
+				T promoted = keys[order / 2];
+
+				int index = parent->keys->findIndex(promoted);
+				parent->keys->insert(promoted); 
+
+				BKeyList<T>* tail = keys->split();
+
+				for (int i = parent->keys->getCurrentSize(); i > index + 1; i--) {
+					parent->children[i] = parent->children[i - 1];
+				}
+
+				parent->children[index + 1] = new BNode(order, parent, tail, isLeaf);
+			}
 		}
 	}
 
