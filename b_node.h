@@ -1,6 +1,9 @@
 #ifndef __B_NODE__
 #define __B_NODE__
 
+#include <string>
+#include <sstream>
+
 #include "b_key_list.h"
 
 template <typename T>
@@ -13,10 +16,9 @@ private:
 	size_t order;	   // The order of this B-Tree
 	bool isLeaf;	   // Indicator of whether this node is a leaf node
 
+	// Splits this node and return the tail part
 	BNode* split() {
 		BNode* tail = new BNode(order, parent, keys->split(), isLeaf);
-
-		currentSize = order / 2;
 
 		for (int i = order / 2 + 1; i < order; i++) {
 			tail->children[i - (order / 2 + 1)] = children[i];
@@ -45,9 +47,8 @@ public:
 	}
 
 	// Constructor of BNode for making a new root node
-	BNode(size_t order, BNode* first, BNode* second) : keys(new BKeyList<T>(order)), order(order), isLeaf(false)
+	BNode(size_t order, BNode* first, BNode* second) : keys(new BKeyList<T>(order)), order(order), parent(nullptr), isLeaf(false)
 	{
-		parent = nullptr;
 		children = new BNode * [order + 1];
 
 		children[0] = first;
@@ -114,29 +115,47 @@ public:
 		bool splitRequired = keys->splitRequired();
 
 		if (splitRequired) {
+			T promoted = keys->operator[](order / 2);
+			BNode* tail = split();
+
 			if (parent == nullptr) {
-				 // Handle when it is root node
+				parent = new BNode(order, this, tail);
 			}
-			else {
-				T promoted = keys[order / 2];
 
-				int index = parent->keys->findIndex(promoted);
-				parent->keys->insert(promoted); 
+			int index = parent->keys->findIndex(promoted);
+			parent->keys->insert(promoted);
 
-				BKeyList<T>* tail = keys->split();
-
-				for (int i = parent->keys->getCurrentSize(); i > index + 1; i--) {
-					parent->children[i] = parent->children[i - 1];
-				}
-
-				parent->children[index + 1] = new BNode(order, parent, tail, isLeaf);
+			for (int i = parent->keys->getCurrentSize(); i > index + 1; i--) {
+				parent->children[i] = parent->children[i - 1];
 			}
+
+			parent->children[index + 1] = tail;
 		}
 	}
 
 	void remove() {
 		std::cout << "Not Implemented yet" << std::endl;
 	}
+
+	std::string preOrder() {
+		std::stringstream ss;
+		BNode* child = nullptr;
+
+		ss << keys->traverse();
+
+		if (!isLeaf) {
+			for (size_t i = 0; i < keys->getCurrentSize(); i++) {
+				child = children[i];
+				ss << "( " << child->preOrder();
+				/*ss << " " << child->preOrder();*/
+			}
+		}
+
+		ss << ")";
+
+		return ss.str();
+	}
+
 };
 
 #endif // !__B_NODE__
