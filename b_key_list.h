@@ -63,6 +63,8 @@ public:
 
 	// Find and return the index of a key
 	size_t findIndex(const T& key) {
+		if (currentSize == 0) return 0;  // TODO: This part should be handled again
+
 		size_t begin = 0;
 		size_t end = currentSize - 1;
 		
@@ -103,7 +105,7 @@ public:
 			return -1;
 		}
 		else {
-			return keyIndex;
+			return static_cast<int>(keyIndex);
 		}
 	}
 
@@ -117,7 +119,7 @@ public:
 			BKeyList* tail = new BKeyList(order);
 			
 			currentSize = order / 2;
-			for (int i = order / 2 + 1; i < order; i++) {
+			for (size_t i = order / 2 + 1; i < order; i++) {
 				tail->insert(keys[i]);
 			}
 
@@ -137,10 +139,12 @@ public:
 	// Returns the string of traverse of this BKeyList
 	std::string traverse() {
 		std::stringstream ss;
+		
 		for (size_t i = 0; i < currentSize; i++) {
 			if (i != 0) ss << " ";
 			ss << keys[i];
 		}
+
 		return ss.str();
 	}
 

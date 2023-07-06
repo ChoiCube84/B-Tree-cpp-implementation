@@ -57,7 +57,7 @@ private:
 	}
 
 public:
-	BTree(size_t order) : order(order), root(new BNode<T>(order, true))
+	BTree(size_t order) : order(order), root(new BNode<T>(order, nullptr, true))
 	{
 		std::cout << "B Tree was made" << std::endl;
 	}

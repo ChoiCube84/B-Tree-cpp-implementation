@@ -1,6 +1,6 @@
 #ifndef __B_NODE__
 #define __B_NODE__
-
+#include <iostream>
 #include <string>
 #include <sstream>
 
@@ -18,14 +18,41 @@ private:
 
 	// Splits this node and return the tail part
 	BNode* split() {
-		BNode* tail = new BNode(order, parent, keys->split(), isLeaf);
-
-		for (int i = order / 2 + 1; i < order; i++) {
-			tail->children[i - (order / 2 + 1)] = children[i];
-			children[i] = nullptr;
+		if (parent == nullptr) {
+			parent = new BNode(this->order, nullptr);
+			parent->children[0] = this;
 		}
 
+		BNode* tail = new BNode(this->order, this->parent, keys->split(), this->isLeaf);
+		
+		if (!isLeaf) {
+			for (size_t i = order / 2 + 1; i < order; i++) {
+				tail->children[i - (order / 2 + 1)] = children[i];
+				children[i] = nullptr;
+			}
+		}
+		
 		return tail;
+	}
+
+	void preOrder(std::stringstream& ss) {
+		BNode* child = nullptr;
+
+		ss << keys->traverse();
+
+		if (!isLeaf) {
+			for (size_t i = 0; i < keys->getCurrentSize() + 1; i++) {
+				child = children[i];
+				
+				if (child != nullptr) { // TODO: Quickly handled this
+					ss << " (";
+					child->preOrder(ss);
+					ss << ")";
+				}
+
+				/*ss << " " << child->preOrder(ss);*/
+			}
+		}
 	}
 
 public:
@@ -62,7 +89,7 @@ public:
 	}
 
 	// Constructor of BNode for making a splitted node
-	BNode(size_t order, BNode* parent, BKeyList<T>* keys, bool isLeaf) : order(order), keys(keys), isLeaf(isLeaf)
+	BNode(size_t order, BNode* parent, BKeyList<T>* keys, bool isLeaf) : order(order), parent(parent), keys(keys), isLeaf(isLeaf)
 	{
 		if (isLeaf) {
 			children = nullptr;
@@ -97,11 +124,7 @@ public:
 	BKeyList<T>* getKeys() { return keys; }
 
 	void insert(const T& key) {
-		// std::cout << "Not Implemented yet" << std::endl;
-		// return false;
-
 		size_t index = keys->findIndex(key);
-		
 		BNode* child = nullptr;
 
 		if (isLeaf) {
@@ -109,23 +132,19 @@ public:
 		}
 		else {
 			child = children[index];
-			child->insert(key);
+			if (child != nullptr) child->insert(key);
 		}
 
 		bool splitRequired = keys->splitRequired();
-
+		
 		if (splitRequired) {
-			T promoted = keys->operator[](order / 2);
+			T promoted = keys->operator[](static_cast<int>(order / 2));
 			BNode* tail = split();
 
-			if (parent == nullptr) {
-				parent = new BNode(order, this, tail);
-			}
-
-			int index = parent->keys->findIndex(promoted);
+			size_t index = parent->keys->findIndex(promoted);
 			parent->keys->insert(promoted);
 
-			for (int i = parent->keys->getCurrentSize(); i > index + 1; i--) {
+			for (size_t i = parent->keys->getCurrentSize(); i > index + 1; i--) {
 				parent->children[i] = parent->children[i - 1];
 			}
 
@@ -137,22 +156,13 @@ public:
 		std::cout << "Not Implemented yet" << std::endl;
 	}
 
+	bool hasParent() { return parent != nullptr; }
+	
+	BNode* getParent() { return parent; }
+
 	std::string preOrder() {
 		std::stringstream ss;
-		BNode* child = nullptr;
-
-		ss << keys->traverse();
-
-		if (!isLeaf) {
-			for (size_t i = 0; i < keys->getCurrentSize(); i++) {
-				child = children[i];
-				ss << "( " << child->preOrder();
-				/*ss << " " << child->preOrder();*/
-			}
-		}
-
-		ss << ")";
-
+		preOrder(ss);
 		return ss.str();
 	}
 
