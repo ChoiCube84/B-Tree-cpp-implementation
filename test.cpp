@@ -1,5 +1,7 @@
-#include <iostream>
 #include <vector>
+#include <random>
+#include <string>
+#include <iostream>
 
 #include "b_key_list.h"
 #include "b_node.h"
@@ -20,7 +22,6 @@ void insertAndPrint(BTree<T>* tree, T key);
 template <typename T>
 void deleteAndPrint(BTree<T>* tree, T key);
 
-
 void BKeyListTest(void);
 void BNodeTest(void);
 void BTreeTest(void);
@@ -39,11 +40,6 @@ void insertAndPrint(BKeyList<T>* list, T key) {
 	cout << "Before Insert: " << list->traverse() << endl;
 	list->insert(key);
 	cout << "After Insert: " << list->traverse() << endl;
-
-	if (list->splitRequired()) {
-		cout << "Split Required" << endl;
-	}
-
 	cout << endl;
 }
 
@@ -51,8 +47,8 @@ template <typename T>
 void deleteAndPrint(BKeyList<T>* list, T key) {
 	cout << "Before deletion: " << list->traverse() << endl;
 	
-	int check = list->remove(key);
-	if (check == -1) {
+	bool deletionSuccess = list->remove(key);
+	if (deletionSuccess) {
 		std::cout << "Deletion Success" << std::endl;
 	}
 	else {
@@ -69,6 +65,7 @@ void insertAndPrint(BNode<T>* node, T key) {
 	cout << "Before Insert: " << node->preOrder() << endl;
 	node->insert(key);
 	cout << "After Insert: " << node->preOrder() << endl;
+	cout << endl;
 }
 
 template <typename T>
@@ -87,9 +84,8 @@ void deleteAndPrint(BTree<T>* tree, T key) {
 }
 
 void BKeyListTest(void) {
-
-	vector<int> keys = { 4, 7, 3, 6, 2, 5, 1, 9, 10, 8, 11 };
 	BKeyList<int>* first = new BKeyList<int>(11);
+	vector<int> keys = { 4, 7, 3, 6, 2, 5, 1, 9, 10, 8, 11 };
 
 	cout << "========== Insert test start ==========" << endl;
 	for (auto i : keys) {
@@ -118,7 +114,7 @@ void BKeyListTest(void) {
 }
 
 void BNodeTest(void) {
-	BNode<int>* node = new BNode<int>(5, nullptr, true);
+	BNode<int>* node = new BNode<int>(5, true);
 	vector<int> keys = { 4, 7, 3, 6, 2, 5, 1, 9, 10, 8, 11, 13, 12, 14, 15, 16, 17, 18, 19 };
 
 	cout << "========== Insert test start ==========" << endl;
@@ -132,7 +128,6 @@ void BNodeTest(void) {
 			cout << endl;
 		}
 		insertAndPrint<int>(node, i);
-		cout << endl;
 	}
 	cout << "========== Insert test done! ==========" << endl;
 
