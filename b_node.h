@@ -10,11 +10,12 @@ template <typename T>
 class BNode
 {
 private:
+	size_t order;
+	size_t childIndex;
+	bool isLeaf;
 	BKeyList<T>* keys;
 	BNode* parent;
 	BNode** children;
-	size_t order;
-	bool isLeaf;
 
 	// Splits this node and return the tail node
 	BNode* splitTailNode(void) {
@@ -26,13 +27,9 @@ private:
 
 	// Constructor of BNode for making a splitted node
 	BNode(BNode* currentNode)
-		: order(currentNode->order), parent(currentNode->parent), keys(currentNode->keys->split()), isLeaf(currentNode->isLeaf)
+		: order(currentNode->order), childIndex(currentNode->childIndex + 1), isLeaf(currentNode->isLeaf), keys(currentNode->keys->split()), parent(currentNode->parent), children(nullptr)
 	{
-		if (isLeaf) {
-			children = nullptr;
-			std::cout << "This is leaf node" << std::endl;
-		}
-		else {
+		if (!isLeaf) {
 			children = new BNode * [order + 1];
 			for (size_t i = 0; i < order + 1; i++) {
 				setChildByIndex(nullptr, i);
@@ -89,6 +86,7 @@ private:
 				
 				// TODO: Delete these brackets later
 				ss << " (";
+				ss << child->childIndex << "th child: ";
 				child->preOrder(ss);
 				ss << ")"; 
 			}
@@ -129,30 +127,37 @@ private:
 		ss << keys->traverse();
 	}
 
-	void setParent(BNode* newParent) { parent = newParent; }
+	void setParent(BNode* newParent) { 
+		parent = newParent; 
+	}
 
-	BNode* getChildByIndex(size_t idx) { return children[idx]; }
-	void setChildByIndex(BNode* child, size_t idx) { children[idx] = child; }
+	BNode* getChildByIndex(size_t idx) { 
+		return children[idx]; 
+	}
+
+	void setChildByIndex(BNode* child, size_t idx) { 
+		if (child != nullptr) {
+			child->childIndex = idx;
+		}
+
+		children[idx] = child; 
+	}
 
 public:
 
 	// Basic constructor of BNode
-	BNode(size_t order, bool isLeaf = false) 
-		: keys(new BKeyList<T>(order)), order(order), parent(nullptr), isLeaf(isLeaf)
+	BNode(size_t order, size_t childIndex = 0, bool isLeaf = false) 
+		: order(order), childIndex(childIndex), isLeaf(isLeaf), keys(new BKeyList<T>(order)), parent(nullptr), children(nullptr)
 	{
-		if (isLeaf) {
-			children = nullptr;
-			std::cout << "B Node was made: This is leaf node" << std::endl;
-		}
-		else {
+		if (!isLeaf) {
 			children = new BNode*[order + 1];
 
 			for (size_t i = 0; i < order + 1; i++) {
 				setChildByIndex(nullptr, i);
-			}
-
-			std::cout << "B Node was made" << std::endl;
+			}	
 		}
+
+		std::cout << "B Node was made" << std::endl;
 	}
 
 	// Destructor of BNode
@@ -196,30 +201,63 @@ public:
 		}
 	}
 
-	void remove() {
-		std::cout << "Not Implemented yet" << std::endl;
+	bool remove(const T& key) {
+		if (isLeaf) {
+			bool deletionSuccess = keys->remove(key);
+			
+			if (keys->isEmpty()) {
+				// TODO: Rebalancing required
+			}
+		}
+
+		else {
+			// TODO: Handle when it is internal node
+		}
 	}
 
-	std::string preOrder() {
+	BNode* getLeftSibling(void) {
+		if (childIndex == 0) {
+			return nullptr;
+		}
+		else {
+			return parent->children[childIndex - 1];
+		}
+	}
+
+	BNode* getRightSibling(void) {
+		if (childIndex == parent->keys->getCurrentSize()) {
+			return nullptr;
+		}
+		else {
+			return parent->children[childIndex + 1];
+		}
+	}
+
+	std::string preOrder(void) {
 		std::stringstream ss;
 		preOrder(ss);
 		return ss.str();
 	}
 
-	std::string inOrder() {
+	std::string inOrder(void) {
 		std::stringstream ss;
 		inOrder(ss);
 		return ss.str();
 	}
 
-	std::string postOrder() {
+	std::string postOrder(void) {
 		std::stringstream ss;
 		postOrder(ss);
 		return ss.str();
 	}
 
-	bool hasParent() { return parent != nullptr; }
-	BNode* getParent() { return parent; }
+	bool hasParent(void) { 
+		return parent != nullptr; 
+	}
+
+	BNode* getParent(void) { 
+		return parent; 
+	}
 };
 
 #endif // !__B_NODE__

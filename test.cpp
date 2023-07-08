@@ -114,7 +114,7 @@ void BKeyListTest(void) {
 }
 
 void BNodeTest(void) {
-	BNode<int>* node = new BNode<int>(5, true);
+	BNode<int>* node = new BNode<int>(5, 0, true);
 	vector<int> keys = { 4, 7, 3, 6, 2, 5, 1, 9, 10, 8, 11, 13, 12, 14, 15, 16, 17, 18, 19 };
 
 	cout << "========== Insert test start ==========" << endl;

@@ -98,7 +98,9 @@ public:
 		return deletionSuccess;
 	}
 
-	bool splitRequired() {	return currentSize >= order; }
+	bool splitRequired() {
+		return currentSize >= order; 
+	}
 
 	BKeyList* split() {
 		if (currentSize < order) return nullptr;
@@ -125,10 +127,16 @@ public:
 		return ss.str();
 	}
 
-	const size_t getCurrentSize() const { return currentSize; }
+	const size_t getCurrentSize() const { 
+		return currentSize; 
+	}
 
 	const T& getKeyByIndex(size_t idx) const {
 		return keys[idx];
+	}
+
+	bool isEmpty(void) {
+		return (currentSize == 0);
 	}
 };
 
