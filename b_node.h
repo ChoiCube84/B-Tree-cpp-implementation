@@ -201,18 +201,73 @@ public:
 		}
 	}
 
+	// TODO: Implement this function to make sure it deletes from leaf node
 	bool remove(const T& key) {
+		bool deletionResult = false;
+
 		if (isLeaf) {
-			bool deletionSuccess = keys->remove(key);
-			
+			deletionResult = keys->remove(key);
+
 			if (keys->isEmpty()) {
-				// TODO: Rebalancing required
+				rebalance();
 			}
 		}
 
 		else {
-			// TODO: Handle when it is internal node
+			size_t indexOfKey = keys->findIndex(key);
+			BNode* child = getChildByIndex(indexOfKey);
+
+			deletionResult = child->remove(key);
+
+			if (!deletionResult) {
+				if (key == keys->getKeyByIndex(indexOfKey)) {
+					BNode* leftChild = getChildByIndex(indexOfKey);
+					BNode* rightChild = getChildByIndex(indexOfKey + 1);
+
+					// TODO: New separator is selected from left subtree. Check if we should consider about right subtree as well.
+					BNode* leftMostLeafNode = getLeftMostLeafNode();
+					T newSeparator = leftMostLeafNode->keys->getLargestKey();
+
+					keys->replaceKeyByIndex(newSeparator, indexOfKey);
+
+					deletionResult = leftMostLeafNode->remove(newSeparator);
+				}
+			}
 		}
+
+		return deletionResult;
+	}
+
+	BNode* getLeftMostLeafNode(void) {
+		if (isLeaf) {
+			return this;
+		}
+		else {
+			BNode* leftMostChild = getLeftMostChild();
+			return leftMostChild->getLeftMostLeafNode();
+		}
+	}
+
+	BNode* getRightMostLeafNode(void) {
+		if (isLeaf) {
+			return this;
+		}
+		else {
+			BNode* rightMostChild = getRightMostChild();
+			return rightMostChild->getRightMostLeafNode();
+		}
+	}
+
+	BNode* getLeftMostChild(void) {
+		return children[0];
+	}
+
+	BNode* getRightMostChild(void) {
+		return children[keys->getCurrentSize()];
+	}
+
+	void rebalance(void) {
+		std::cout << "Not implemented yet" << std::endl;
 	}
 
 	BNode* getLeftSibling(void) {

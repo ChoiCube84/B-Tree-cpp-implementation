@@ -14,28 +14,28 @@ private:
 	size_t order;
 	size_t currentSize;
 
-	void insertByIndex(const T& key, size_t idx) { 
+	void insertByIndex(const T& key, size_t index) { 
 		if (currentSize < order) {
-			T prev = keys[idx];
+			T prev = keys[index];
 
-			for (size_t i = idx; i < currentSize; i++) {
+			for (size_t i = index; i < currentSize; i++) {
 				swap<T>(prev, keys[i + 1]);
 			}
 
-			keys[idx] = key;
+			keys[index] = key;
 			currentSize++;
 		}
 	}
 
-	bool removeByIndex(const T& key, size_t idx) {
-		if (keys[idx] != key) {
+	bool removeByIndex(const T& key, size_t index) {
+		if (keys[index] != key) {
 			return false;
 		}
 
 		else {
 			currentSize--;
 
-			for (size_t i = idx; i < currentSize; i++) {
+			for (size_t i = index; i < currentSize; i++) {
 				keys[i] = keys[i + 1];
 			}
 
@@ -89,13 +89,13 @@ public:
 
 	bool remove(const T& key) {
 		size_t keyIndex = findIndex(key);
-		bool deletionSuccess = false;
+		bool deletionResult = false;
 
 		if (keyIndex < currentSize) {
-			deletionSuccess = removeByIndex(key, keyIndex);
+			deletionResult = removeByIndex(key, keyIndex);
 		}
 		
-		return deletionSuccess;
+		return deletionResult;
 	}
 
 	bool splitRequired() {
@@ -131,12 +131,25 @@ public:
 		return currentSize; 
 	}
 
-	const T& getKeyByIndex(size_t idx) const {
-		return keys[idx];
+	const T& getKeyByIndex(size_t index) const {
+		return keys[index];
 	}
 
+	const T& getSmallestKey(void) const {
+		return keys[0];
+	}
+
+	const T& getLargestKey(void) const {
+		return keys[currentSize - 1];
+	}
+	
 	bool isEmpty(void) {
 		return (currentSize == 0);
+	}
+
+	// TODO: Reconsider using this function
+	void replaceKeyByIndex(const T& newKey, size_t index) {
+		keys[index] = newKey;
 	}
 };
 
