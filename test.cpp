@@ -62,9 +62,9 @@ void deleteAndPrint(BKeyList<T>* list, T key) {
 template <typename T>
 void insertAndPrint(BNode<T>* node, T key) {
 	cout << "Inserting " << key << endl;
-	cout << "Before Insert: " << node->preOrder() << endl;
+	cout << "Before Insert: " << node->preOrder(true) << endl;
 	node->insert(key);
-	cout << "After Insert: " << node->preOrder() << endl;
+	cout << "After Insert: " << node->preOrder(true) << endl;
 	cout << endl;
 }
 

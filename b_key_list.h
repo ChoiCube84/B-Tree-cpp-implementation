@@ -143,6 +143,7 @@ public:
 		return keys[currentSize - 1];
 	}
 	
+	//TODO: Check if this function is neccessary
 	bool isEmpty(void) {
 		return (currentSize == 0);
 	}

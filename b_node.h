@@ -75,7 +75,7 @@ private:
 		}
 	}
 
-	void preOrder(std::stringstream& ss) {
+	void preOrder(std::stringstream& ss, bool useBrackets = false) {
 		BNode* child = nullptr;
 
 		ss << keys->traverse();
@@ -84,11 +84,17 @@ private:
 			for (size_t i = 0; i < keys->getCurrentSize() + 1; i++) {
 				child = getChildByIndex(i);
 				
-				// TODO: Delete these brackets later
-				ss << " (";
-				ss << child->childIndex << "th child: ";
-				child->preOrder(ss);
-				ss << ")"; 
+				ss << " ";
+
+				if (useBrackets) {
+					ss << "(";
+				}
+
+				child->preOrder(ss, useBrackets);
+
+				if (useBrackets) {
+					ss << ")";
+				}
 			}
 		}
 	}
@@ -110,17 +116,24 @@ private:
 		}
 	}
 
-	void postOrder(std::stringstream& ss) {
+	void postOrder(std::stringstream& ss, bool useBrackets = false) {
 		BNode* child = nullptr;
 
 		if (!isLeaf) {
 			for (size_t i = 0; i < keys->getCurrentSize() + 1; i++) {
 				child = getChildByIndex(i);
 
-				// TODO: Delete these brackets later
-				ss << "(";
-				child->postOrder(ss);
-				ss << ") ";
+				if (useBrackets) {
+					ss << "(";
+				}
+				
+				child->postOrder(ss, useBrackets);
+
+				if (useBrackets) { 
+					ss << ")"; 
+				}
+
+				ss << " ";
 			}
 		}
 
@@ -143,9 +156,21 @@ private:
 		children[idx] = child; 
 	}
 
-public:
+	bool isDeficientNode(void) {
+		size_t numberOfChildrenNodes = keys->getCurrentSize() + 1;
+		size_t minimumNumberOfRequiredKeys = (order + 1) / 2;
 
-	// Basic constructor of BNode
+		return numberOfChildrenNodes < minimumNumberOfRequiredKeys;
+	}
+
+	bool isExceedingNode(void) {
+		size_t numberOfChildrenNodes = keys->getCurrentSize() + 1;
+		size_t minimumNumberOfRequiredKeys = (order + 1) / 2;
+
+		return numberOfChildrenNodes > minimumNumberOfRequiredKeys;
+	}
+
+public:
 	BNode(size_t order, size_t childIndex = 0, bool isLeaf = false) 
 		: order(order), childIndex(childIndex), isLeaf(isLeaf), keys(new BKeyList<T>(order)), parent(nullptr), children(nullptr)
 	{
@@ -160,7 +185,6 @@ public:
 		std::cout << "B Node was made" << std::endl;
 	}
 
-	// Destructor of BNode
 	~BNode()
 	{
 		delete keys;
@@ -208,7 +232,7 @@ public:
 		if (isLeaf) {
 			deletionResult = keys->remove(key);
 
-			if (keys->isEmpty()) {
+			if (isDeficientNode()) {
 				rebalance();
 			}
 		}
@@ -267,7 +291,18 @@ public:
 	}
 
 	void rebalance(void) {
-		std::cout << "Not implemented yet" << std::endl;
+		BNode* leftSibling = getLeftSibling();
+		BNode* rightSibling = getRightSibling();
+
+		if (leftSibling != nullptr && leftSibling->isExceedingNode()) {
+			// TODO: Implement right rotation
+		}
+		else if (rightSibling != nullptr && rightSibling->isExceedingNode()) {
+			// TODO: Implement left rotation
+		}
+		else {
+			// TODO: Implement merging
+		}
 	}
 
 	BNode* getLeftSibling(void) {
@@ -288,9 +323,9 @@ public:
 		}
 	}
 
-	std::string preOrder(void) {
+	std::string preOrder(bool useBrackets = false) {
 		std::stringstream ss;
-		preOrder(ss);
+		preOrder(ss, useBrackets);
 		return ss.str();
 	}
 
@@ -300,9 +335,9 @@ public:
 		return ss.str();
 	}
 
-	std::string postOrder(void) {
+	std::string postOrder(bool useBrackets = false) {
 		std::stringstream ss;
-		postOrder(ss);
+		postOrder(ss, useBrackets);
 		return ss.str();
 	}
 
