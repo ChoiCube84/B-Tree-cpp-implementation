@@ -252,7 +252,8 @@ public:
 					BNode* leftMostLeafNode = getLeftMostLeafNode();
 					T newSeparator = leftMostLeafNode->keys->getLargestKey();
 
-					keys->replaceKeyByIndex(newSeparator, indexOfKey);
+					// TODO: Reconsider using this function
+					keys->setKeyByIndex(newSeparator, indexOfKey);
 
 					deletionResult = leftMostLeafNode->remove(newSeparator);
 				}
@@ -295,13 +296,13 @@ public:
 		BNode* rightSibling = getRightSibling();
 
 		if (leftSibling != nullptr && leftSibling->isExceedingNode()) {
-			// TODO: Implement right rotation
+			rightRotation();
 		}
 		else if (rightSibling != nullptr && rightSibling->isExceedingNode()) {
-			// TODO: Implement left rotation
+			leftRotation();
 		}
 		else {
-			// TODO: Implement merging
+			mergeNode();
 		}
 	}
 
@@ -321,6 +322,38 @@ public:
 		else {
 			return parent->children[childIndex + 1];
 		}
+	}
+
+	void leftRotation(void) {
+		size_t separatorIndex = childIndex;
+		T oldSeparator = parent->keys->getKeyByIndex(separatorIndex);
+
+		insert(oldSeparator);
+
+		BNode* rightSibling = getRightSibling();
+		T newSeparator = rightSibling->keys->getKeyByIndex(0);
+		rightSibling->remove(newSeparator);
+
+		//TODO: Reconsider using this function
+		parent->keys->setKeyByIndex(newSeparator, separatorIndex);
+	}
+
+	void rightRotation(void) {
+		size_t separatorIndex = childIndex - 1;
+		T oldSeparator = parent->keys->getKeyByIndex(separatorIndex);
+
+		insert(oldSeparator);
+
+		BNode* leftSibling = getLeftSibling();
+		T newSeparator = leftSibling->keys->getKeyByIndex(leftSibling->keys->getCurrentSize() - 1);
+		leftSibling->remove(newSeparator);
+
+		//TODO: Reconsider using this function
+		parent->keys->setKeyByIndex(newSeparator, separatorIndex);
+	}
+
+	void mergeNode(void) {
+		std::cout << "Not implemented yet" << std::endl;
 	}
 
 	std::string preOrder(bool useBrackets = false) {
