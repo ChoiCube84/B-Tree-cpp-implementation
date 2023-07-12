@@ -149,8 +149,15 @@ public:
 	}
 
 	// TODO: Reconsider using this function
-	void replaceKeyByIndex(const T& newKey, size_t index) {
+	void setKeyByIndex(const T& newKey, size_t index) {
 		keys[index] = newKey;
+	}
+
+	void mergeWithOtherBKeyList(BKeyList* other) {
+		for (size_t i = 0; i < other->getCurrentSize(); i++) {
+			T currentKey = other->getKeyByIndex(i);
+			insert(currentKey);
+		}
 	}
 };
 

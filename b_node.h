@@ -302,7 +302,7 @@ public:
 			leftRotation();
 		}
 		else {
-			mergeNode();
+			mergeWithSiblingNode();
 		}
 	}
 
@@ -352,8 +352,24 @@ public:
 		parent->keys->setKeyByIndex(newSeparator, separatorIndex);
 	}
 
-	void mergeNode(void) {
-		std::cout << "Not implemented yet" << std::endl;
+	void mergeWithSiblingNode(void) {
+		BNode* leftSibling = getLeftSibling();
+		BNode* rightSibling = getRightSibling();
+
+		if (leftSibling != nullptr) {
+			// TODO: Merge with left sibling node
+			size_t separatorIndex = childIndex;
+			T separator = parent->keys->getKeyByIndex(separatorIndex);
+
+			leftSibling->insert(separator);
+			keys->mergeWithOtherBKeyList(leftSibling->keys);
+
+			// TODO: Detach left sibling and shift the children
+		}
+		
+		else {
+			// TODO: Merge with right sibling node
+		}
 	}
 
 	std::string preOrder(bool useBrackets = false) {
