@@ -357,18 +357,41 @@ public:
 		BNode* rightSibling = getRightSibling();
 
 		if (leftSibling != nullptr) {
-			// TODO: Merge with left sibling node
-			size_t separatorIndex = childIndex;
+			size_t separatorIndex = childIndex - 1;
 			T separator = parent->keys->getKeyByIndex(separatorIndex);
 
+			parent->keys->remove(separator);
 			leftSibling->insert(separator);
+
 			keys->mergeWithOtherBKeyList(leftSibling->keys);
 
-			// TODO: Detach left sibling and shift the children
+			for (size_t i = parent->keys->getCurrentSize() + 1; i > separatorIndex; i--) {
+				BNode* childToShift = parent->getChildByIndex(i);
+				parent->setChildByIndex(childToShift, i - 1);
+			}
+
+			delete leftSibling;
 		}
 		
 		else {
-			// TODO: Merge with right sibling node
+			size_t separatorIndex = childIndex;
+			T separator = parent->keys->getKeyByIndex(separatorIndex);
+
+			parent->keys->remove(separator);
+			insert(separator);
+
+			keys->mergeWithOtherBKeyList(rightSibling->keys);
+
+			for (size_t i = parent->keys->getCurrentSize() + 1; i > separatorIndex + 1; i--) {
+				BNode* childToShift = parent->getChildByIndex(i);
+				parent->setChildByIndex(childToShift, i - 1);
+			}
+
+			delete rightSibling;
+		}
+
+		if (parent->parent != nullptr && parent->isDeficientNode()) {
+			parent->rebalance();
 		}
 	}
 
