@@ -157,10 +157,15 @@ private:
 	}
 
 	bool isDeficientNode(void) {
-		size_t numberOfChildrenNodes = keys->getCurrentSize() + 1;
-		size_t minimumNumberOfRequiredKeys = (order + 1) / 2;
+		if (parent == nullptr) {
+			return false;
+		}
+		else {
+			size_t numberOfChildrenNodes = keys->getCurrentSize() + 1;
+			size_t minimumNumberOfRequiredKeys = (order + 1) / 2;
 
-		return numberOfChildrenNodes < minimumNumberOfRequiredKeys;
+			return numberOfChildrenNodes < minimumNumberOfRequiredKeys;
+		}
 	}
 
 	bool isExceedingNode(void) {
@@ -225,7 +230,6 @@ public:
 		}
 	}
 
-	// TODO: Implement this function to make sure it deletes from leaf node
 	bool remove(const T& key) {
 		bool deletionResult = false;
 
@@ -236,27 +240,30 @@ public:
 				rebalance();
 			}
 		}
-
 		else {
 			size_t indexOfKey = keys->findIndex(key);
-			BNode* child = getChildByIndex(indexOfKey);
 
-			deletionResult = child->remove(key);
+			if (keys->isExistingKey(key)) {
+				BNode* leftChildOfKey = getChildByIndex(indexOfKey);
+				BNode* rightChildOfKey = getChildByIndex(indexOfKey + 1);
 
-			if (!deletionResult) {
-				if (key == keys->getKeyByIndex(indexOfKey)) {
-					BNode* leftChild = getChildByIndex(indexOfKey);
-					BNode* rightChild = getChildByIndex(indexOfKey + 1);
+				// TODO: New separator is selected from right subtree. Check if we should consider about left subtree as well.
+				BNode* leftMostLeafNodeOfRightSubtree = rightChildOfKey->getLeftMostLeafNode();
+				T newSeparator = leftMostLeafNodeOfRightSubtree->keys->getSmallestKey();
 
-					// TODO: New separator is selected from left subtree. Check if we should consider about right subtree as well.
-					BNode* leftMostLeafNode = getLeftMostLeafNode();
-					T newSeparator = leftMostLeafNode->keys->getLargestKey();
+				// BNode* rightMostLeafNodeOfLeftSubtree = leftChildOfKey->getRightMostLeafNode();
+				// T newSeparator = rightMostLeafNodeOfLeftSubtree->keys->getLargestKey();
 
-					// TODO: Reconsider using this function
-					keys->setKeyByIndex(newSeparator, indexOfKey);
+				// TODO: Reconsider using this function
+				keys->setKeyByIndex(newSeparator, indexOfKey);
 
-					deletionResult = leftMostLeafNode->remove(newSeparator);
-				}
+				deletionResult = leftMostLeafNodeOfRightSubtree->remove(newSeparator);
+				// deletionResult = rightMostLeafNodeOfLeftSubtree->remove(newSeparator);
+			}
+
+			else {
+				BNode* child = getChildByIndex(indexOfKey);
+				deletionResult = child->remove(key);
 			}
 		}
 
@@ -264,23 +271,23 @@ public:
 	}
 
 	BNode* getLeftMostLeafNode(void) {
-		if (isLeaf) {
-			return this;
+		BNode* currentNode = this;
+
+		while (currentNode->isLeaf == false) {
+			currentNode = currentNode->getLeftMostChild();
 		}
-		else {
-			BNode* leftMostChild = getLeftMostChild();
-			return leftMostChild->getLeftMostLeafNode();
-		}
+
+		return currentNode;
 	}
 
 	BNode* getRightMostLeafNode(void) {
-		if (isLeaf) {
-			return this;
+		BNode* currentNode = this;
+
+		while (currentNode->isLeaf == false) {
+			currentNode = currentNode->getRightMostChild();
 		}
-		else {
-			BNode* rightMostChild = getRightMostChild();
-			return rightMostChild->getRightMostLeafNode();
-		}
+
+		return currentNode;
 	}
 
 	BNode* getLeftMostChild(void) {
@@ -328,11 +335,11 @@ public:
 		size_t separatorIndex = childIndex;
 		T oldSeparator = parent->keys->getKeyByIndex(separatorIndex);
 
-		insert(oldSeparator);
+		keys->insert(oldSeparator);
 
 		BNode* rightSibling = getRightSibling();
-		T newSeparator = rightSibling->keys->getKeyByIndex(0);
-		rightSibling->remove(newSeparator);
+		T newSeparator = rightSibling->keys->getSmallestKey();
+		rightSibling->keys->remove(newSeparator);
 
 		//TODO: Reconsider using this function
 		parent->keys->setKeyByIndex(newSeparator, separatorIndex);
@@ -342,11 +349,11 @@ public:
 		size_t separatorIndex = childIndex - 1;
 		T oldSeparator = parent->keys->getKeyByIndex(separatorIndex);
 
-		insert(oldSeparator);
+		keys->insert(oldSeparator);
 
 		BNode* leftSibling = getLeftSibling();
-		T newSeparator = leftSibling->keys->getKeyByIndex(leftSibling->keys->getCurrentSize() - 1);
-		leftSibling->remove(newSeparator);
+		T newSeparator = leftSibling->keys->getLargestKey();
+		leftSibling->keys->remove(newSeparator);
 
 		//TODO: Reconsider using this function
 		parent->keys->setKeyByIndex(newSeparator, separatorIndex);

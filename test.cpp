@@ -70,17 +70,43 @@ void insertAndPrint(BNode<T>* node, T key) {
 
 template <typename T>
 void deleteAndPrint(BNode<T>* node, T key) {
-	// TODO: Make the test code
+	cout << "Before deletion: " << node->preOrder(true) << endl;
+
+	bool deletionSuccess = node->remove(key);
+	if (deletionSuccess) {
+		std::cout << "Deletion Success" << std::endl;
+	}
+	else {
+		std::cout << "Deletion Failed" << std::endl;
+	}
+
+	cout << "After deletion: " << node->preOrder(true) << endl;
+	cout << endl;
 }
 
 template <typename T>
 void insertAndPrint(BTree<T>* tree, T key) {
-	// TODO: Make the test code
+	cout << "Inserting " << key << endl;
+	cout << "Before Insert: " << tree->preOrder(true) << endl;
+	tree->insert(key);
+	cout << "After Insert: " << tree->preOrder(true) << endl;
+	cout << endl;
 }
 
 template <typename T>
 void deleteAndPrint(BTree<T>* tree, T key) {
-	// TODO: Make the test code
+	cout << "Before deletion: " << tree->preOrder(true) << endl;
+
+	bool deletionSuccess = tree->remove(key);
+	if (deletionSuccess) {
+		std::cout << "Deletion Success" << std::endl;
+	}
+	else {
+		std::cout << "Deletion Failed" << std::endl;
+	}
+
+	cout << "After deletion: " << tree->preOrder(true) << endl;
+	cout << endl;
 }
 
 void BKeyListTest(void) {
@@ -130,6 +156,15 @@ void BNodeTest(void) {
 		insertAndPrint<int>(node, i);
 	}
 	cout << "========== Insert test done! ==========" << endl;
+
+	cout << endl;
+
+	cout << "========== Delete test start ==========" << endl;
+	keys = { 20, 5, 15 }; // TODO: Add more tests
+	for (auto i : keys) {
+		deleteAndPrint<int>(node, i);
+	}
+	cout << "========== Delete test done! ==========" << endl;
 
 	delete node;
 }

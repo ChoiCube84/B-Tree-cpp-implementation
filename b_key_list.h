@@ -143,6 +143,11 @@ public:
 		return keys[currentSize - 1];
 	}
 	
+	bool isExistingKey(const T& key) {
+		size_t indexOfKey = findIndex(key);
+		return (key == getKeyByIndex(indexOfKey));
+	}
+
 	//TODO: Check if this function is neccessary
 	bool isEmpty(void) {
 		return (currentSize == 0);
