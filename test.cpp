@@ -146,7 +146,7 @@ void BNodeTest(void) {
 	cout << "========== Insert test start ==========" << endl;
 	for (auto i : keys) {
 		if (node->hasParent()) {
-			cout << "Parent Detected!" << endl;
+			cout << "New parent Detected!" << endl;
 			node = node->getParent();
 			
 			cout << "Current Status: " << node->preOrder() << endl;
@@ -160,8 +160,16 @@ void BNodeTest(void) {
 	cout << endl;
 
 	cout << "========== Delete test start ==========" << endl;
-	keys = { 20, 5, 15 }; // TODO: Add more tests
+	keys = { 20, 5, 15, 1 }; // TODO: Add more tests
 	for (auto i : keys) {
+		if (node->isEmpty()) {
+			cout << "Empty parent Detected!" << endl;
+			node = node->getLeftMostChild();
+
+			cout << "Current Status: " << node->preOrder() << endl;
+
+			cout << endl;
+		}
 		deleteAndPrint<int>(node, i);
 	}
 	cout << "========== Delete test done! ==========" << endl;

@@ -1,5 +1,6 @@
 #ifndef __B_NODE__
 #define __B_NODE__
+
 #include <iostream>
 #include <string>
 #include <sstream>
@@ -17,7 +18,6 @@ private:
 	BNode* parent;
 	BNode** children;
 
-	// Splits this node and return the tail node
 	BNode* splitTailNode(void) {
 		BNode* tail = new BNode(this);
 		passChildrenToTailNode(tail);
@@ -25,7 +25,6 @@ private:
 		return tail;
 	}
 
-	// Constructor of BNode for making a splitted node
 	BNode(BNode* currentNode)
 		: order(currentNode->order), childIndex(currentNode->childIndex + 1), isLeaf(currentNode->isLeaf), keys(currentNode->keys->split()), parent(currentNode->parent), children(nullptr)
 	{
@@ -150,6 +149,7 @@ private:
 
 	void setChildByIndex(BNode* child, size_t idx) { 
 		if (child != nullptr) {
+			child->parent = this;
 			child->childIndex = idx;
 		}
 
@@ -361,45 +361,55 @@ public:
 
 	void mergeWithSiblingNode(void) {
 		BNode* leftSibling = getLeftSibling();
-		BNode* rightSibling = getRightSibling();
 
 		if (leftSibling != nullptr) {
-			size_t separatorIndex = childIndex - 1;
-			T separator = parent->keys->getKeyByIndex(separatorIndex);
-
-			parent->keys->remove(separator);
-			leftSibling->insert(separator);
-
-			keys->mergeWithOtherBKeyList(leftSibling->keys);
-
-			for (size_t i = parent->keys->getCurrentSize() + 1; i > separatorIndex; i--) {
-				BNode* childToShift = parent->getChildByIndex(i);
-				parent->setChildByIndex(childToShift, i - 1);
-			}
-
-			delete leftSibling;
+			mergeWithLeftSibling();
 		}
-		
 		else {
-			size_t separatorIndex = childIndex;
-			T separator = parent->keys->getKeyByIndex(separatorIndex);
-
-			parent->keys->remove(separator);
-			insert(separator);
-
-			keys->mergeWithOtherBKeyList(rightSibling->keys);
-
-			for (size_t i = parent->keys->getCurrentSize() + 1; i > separatorIndex + 1; i--) {
-				BNode* childToShift = parent->getChildByIndex(i);
-				parent->setChildByIndex(childToShift, i - 1);
-			}
-
-			delete rightSibling;
+			mergeWithRightSibling();
 		}
 
-		if (parent->parent != nullptr && parent->isDeficientNode()) {
+		if (parent->hasParent() && parent->isDeficientNode()) {
 			parent->rebalance();
 		}
+	}
+
+	void mergeWithLeftSibling(void) {
+		BNode* leftSibling = getLeftSibling();
+
+		size_t separatorIndex = childIndex - 1;
+		T separator = parent->keys->getKeyByIndex(separatorIndex);
+
+		parent->keys->remove(separator);
+		leftSibling->keys->insert(separator);
+
+		keys->mergeWithOtherBKeyList(leftSibling->keys);
+
+		for (size_t i = parent->keys->getCurrentSize() + 1; i > separatorIndex; i--) {
+			BNode* childToShift = parent->getChildByIndex(i);
+			parent->setChildByIndex(childToShift, i - 1);
+		}
+
+		delete leftSibling;
+	}
+
+	void mergeWithRightSibling(void) {
+		BNode* rightSibling = getRightSibling();
+
+		size_t separatorIndex = childIndex;
+		T separator = parent->keys->getKeyByIndex(separatorIndex);
+
+		bool removeSuccess = parent->keys->remove(separator);
+		keys->insert(separator);
+
+		keys->mergeWithOtherBKeyList(rightSibling->keys);
+
+		for (size_t i = parent->keys->getCurrentSize() + 1; i > separatorIndex + 1; i--) {
+			BNode* childToShift = parent->getChildByIndex(i);
+			parent->setChildByIndex(childToShift, i - 1);
+		}
+
+		delete rightSibling;
 	}
 
 	std::string preOrder(bool useBrackets = false) {
@@ -426,6 +436,10 @@ public:
 
 	BNode* getParent(void) { 
 		return parent; 
+	}
+
+	bool isEmpty(void) {
+		return keys->isEmpty();
 	}
 };
 
