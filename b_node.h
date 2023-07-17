@@ -194,9 +194,11 @@ public:
 	{
 		delete keys;
 
-		if (!isLeaf) {
+		//TODO: This condition statement should be revised
+		if (!isLeaf && children != nullptr) {
 			for (size_t i = 0; i < order; i++) {
-				delete children[i];
+				BNode* child = children[i];
+				delete child;
 			}
 			delete[] children;
 		}
@@ -359,57 +361,49 @@ public:
 		parent->keys->setKeyByIndex(newSeparator, separatorIndex);
 	}
 
-	void mergeWithSiblingNode(void) {
-		BNode* leftSibling = getLeftSibling();
+	void mergeTwoChildrenNode(size_t leftChildNodeIndex, size_t rightChildNodeIndex) {
+		// Warning: leftNodeIndex + 1 == rightNodeIndex should be true
+		BNode* leftChildNode = getChildByIndex(leftChildNodeIndex);
+		BNode* rightChildNode = getChildByIndex(rightChildNodeIndex);
 
-		if (leftSibling != nullptr) {
-			mergeWithLeftSibling();
+		size_t numberOfChildrenOfLeftChildNode = leftChildNode->keys->getCurrentSize() + 1;
+		size_t numberOfChildrenOfRightChildNode = rightChildNode->keys->getCurrentSize() + 1;
+
+		size_t separatorIndex = leftChildNodeIndex;
+		T separator = keys->getKeyByIndex(separatorIndex);
+
+		keys->remove(separator);
+		leftChildNode->keys->insert(separator);
+
+		leftChildNode->keys->mergeWithOtherBKeyList(rightChildNode->keys);
+		for (size_t i = keys->getCurrentSize() + 1; i > separatorIndex + 1; i--) {
+			BNode* childToShift = getChildByIndex(i);
+			setChildByIndex(childToShift, i - 1);
+		}
+		
+		// TODO: Revise this condition statement
+		if (!leftChildNode->isLeaf && !rightChildNode->isLeaf) {
+			for (size_t i = 0; i < numberOfChildrenOfRightChildNode; i++) {
+				BNode* childToShift = rightChildNode->getChildByIndex(i);
+				leftChildNode->setChildByIndex(childToShift, numberOfChildrenOfLeftChildNode + i);
+				rightChildNode->setChildByIndex(nullptr, i);
+			}
+		}
+
+		delete rightChildNode;
+
+		if (hasParent() && isDeficientNode()) {
+			rebalance();
+		}
+	}
+
+	void mergeWithSiblingNode(void) {
+		if (childIndex < parent->keys->getCurrentSize()) {
+			parent->mergeTwoChildrenNode(childIndex, childIndex + 1);
 		}
 		else {
-			mergeWithRightSibling();
+			parent->mergeTwoChildrenNode(childIndex - 1, childIndex);
 		}
-
-		if (parent->hasParent() && parent->isDeficientNode()) {
-			parent->rebalance();
-		}
-	}
-
-	void mergeWithLeftSibling(void) {
-		BNode* leftSibling = getLeftSibling();
-
-		size_t separatorIndex = childIndex - 1;
-		T separator = parent->keys->getKeyByIndex(separatorIndex);
-
-		parent->keys->remove(separator);
-		leftSibling->keys->insert(separator);
-
-		keys->mergeWithOtherBKeyList(leftSibling->keys);
-
-		for (size_t i = parent->keys->getCurrentSize() + 1; i > separatorIndex; i--) {
-			BNode* childToShift = parent->getChildByIndex(i);
-			parent->setChildByIndex(childToShift, i - 1);
-		}
-
-		delete leftSibling;
-	}
-
-	void mergeWithRightSibling(void) {
-		BNode* rightSibling = getRightSibling();
-
-		size_t separatorIndex = childIndex;
-		T separator = parent->keys->getKeyByIndex(separatorIndex);
-
-		bool removeSuccess = parent->keys->remove(separator);
-		keys->insert(separator);
-
-		keys->mergeWithOtherBKeyList(rightSibling->keys);
-
-		for (size_t i = parent->keys->getCurrentSize() + 1; i > separatorIndex + 1; i--) {
-			BNode* childToShift = parent->getChildByIndex(i);
-			parent->setChildByIndex(childToShift, i - 1);
-		}
-
-		delete rightSibling;
 	}
 
 	std::string preOrder(bool useBrackets = false) {

@@ -160,7 +160,7 @@ void BNodeTest(void) {
 	cout << endl;
 
 	cout << "========== Delete test start ==========" << endl;
-	keys = { 20, 5, 15, 1 }; // TODO: Add more tests
+	keys = { 20, 5, 15, 1, 19, 8, 9, 13, 10, 4, 16, 2, 11 }; // TODO: Add more tests
 	for (auto i : keys) {
 		if (node->isEmpty()) {
 			cout << "Empty parent Detected!" << endl;
