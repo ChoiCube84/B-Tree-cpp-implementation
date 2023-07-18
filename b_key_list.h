@@ -8,9 +8,11 @@
 template<typename T>
 class BKeyList 
 {
-private:
+public:
 	const size_t order;
 	size_t currentSize;
+
+private:
 	T* keys;
 
 	void insertByIndex(const T& key, size_t index) { 

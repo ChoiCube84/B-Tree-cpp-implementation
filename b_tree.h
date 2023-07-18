@@ -1,8 +1,8 @@
 #ifndef __B_TREE__
 #define __B_TREE__
 
-#include <iostream>
 #include <string>
+#include <sstream>
 #include <functional>
 
 #include "b_node.h"
@@ -10,10 +10,61 @@
 template <typename T>
 class BTree
 {
-private:
+public:
 	const size_t order;
+
+private:
 	BNode<T>* root;
 
+public:
+	BTree(size_t order) : order(order), root(new BNode<T>(order, true)) {
+	}
+
+	~BTree() {
+		destructorHelper(root);
+	}
+
+	void insert(const T& key) {
+		root->insert(key);
+		if (root->hasParent()) {
+			root = root->getParent();
+		}
+	}
+
+	bool remove(const T& key) {
+		bool deletionResult = root->remove(key);
+
+		if (root->isEmpty()) {
+			root = root->replaceRootNode();
+		}
+
+		return deletionResult;
+	}
+
+	bool find(const T& key) {
+		bool findResult = root->find(key);
+		return findResult;
+	}
+
+	std::string preOrder(bool useBrackets = false) {
+		std::stringstream ss;
+		preOrderHelper(ss, root, useBrackets);
+		return ss.str();
+	}
+
+	std::string inOrder(void) {
+		std::stringstream ss;
+		inOrderHelper(ss, root);
+		return ss.str();
+	}
+
+	std::string postOrder(bool useBrackets = false) {
+		std::stringstream ss;
+		postOrderHelper(ss, root, useBrackets);
+		return ss.str();
+	}
+
+private:
 	void destructorHelper(BNode<T>* currentNode) {
 		if (!currentNode->isLeaf) {
 			for (size_t i = 0; i < currentNode->getCurrentSize(); i++) {
@@ -98,54 +149,6 @@ private:
 		}
 
 		ss << currentNode->traverse();
-	}
-
-public:
-	BTree(size_t order) : order(order), root(new BNode<T>(order, true)) {
-	}
-
-	~BTree() {
-		destructorHelper(root);
-	}
-
-	void insert(const T& key) {
-		root->insert(key);
-		if (root->hasParent()) {
-			root = root->getParent();
-		}
-	}
-
-	bool remove(const T& key) {
-		bool deletionResult = root->remove(key);
-
-		if (root->isEmpty()) {
-			root = root->replaceRootNode();
-		}
-
-		return deletionResult;
-	}
-
-	bool find(const T& key) {
-		bool findResult = root->find(key);
-		return findResult;
-	}
-
-	std::string preOrder(bool useBrackets = false) {
-		std::stringstream ss;
-		preOrderHelper(ss, root, useBrackets);
-		return ss.str();
-	}
-
-	std::string inOrder(void) {
-		std::stringstream ss;
-		inOrderHelper(ss, root);
-		return ss.str();
-	}
-
-	std::string postOrder(bool useBrackets = false) {
-		std::stringstream ss;
-		postOrderHelper(ss, root, useBrackets);
-		return ss.str();
 	}
 };
 

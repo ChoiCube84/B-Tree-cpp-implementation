@@ -1,7 +1,6 @@
 #ifndef __B_NODE__
 #define __B_NODE__
 
-#include <iostream>
 #include <string>
 
 #include "b_key_list.h"
@@ -21,7 +20,7 @@ private:
 
 public:
 	BNode(size_t order, bool isLeaf = false) 
-		: order(order), childIndex(childIndex), isLeaf(isLeaf), keys(new BKeyList<T>(order)), parent(nullptr), children(nullptr)
+		: order(order), childIndex(0), isLeaf(isLeaf), keys(new BKeyList<T>(order)), parent(nullptr), children(nullptr)
 	{
 		if (!isLeaf) {
 			children = new BNode*[order + 1];
