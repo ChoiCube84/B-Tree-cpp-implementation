@@ -9,10 +9,9 @@ template<typename T>
 class BKeyList 
 {
 private:
-
-	T* keys;
-	size_t order;
+	const size_t order;
 	size_t currentSize;
+	T* keys;
 
 	void insertByIndex(const T& key, size_t index) { 
 		if (currentSize < order) {
@@ -45,14 +44,38 @@ private:
 
 public:
 	
-	BKeyList(size_t order) : keys(new T[order]), order(order), currentSize(0)
-	{
-		std::cout << "B Key List was made" << std::endl;
+	BKeyList(size_t order) : keys(new T[order]), order(order), currentSize(0) {
 	}
 
 	~BKeyList() {
 		delete[] keys;
-		std::cout << "B Key List was destructed" << std::endl;
+	}
+
+	void insert(const T& key) {
+		size_t keyIndex = findIndex(key);
+		insertByIndex(key, keyIndex);
+	}
+
+	bool remove(const T& key) {
+		size_t keyIndex = findIndex(key);
+		bool deletionResult = false;
+
+		if (keyIndex < currentSize) {
+			deletionResult = removeByIndex(key, keyIndex);
+		}
+		
+		return deletionResult;
+	}
+
+	bool search(const T& key) {
+		size_t indexOfKey = findIndex(key);
+		
+		if (key == getKeyByIndex(indexOfKey)) {
+			return true;
+		}
+		else {
+			return false;
+		}
 	}
 
 	size_t findIndex(const T& key) {
@@ -78,24 +101,8 @@ public:
 				result++;
 		}
 
-		std::cout << "Index of the Key: " << result << std::endl; // For debugging
+		// std::cout << "Index of the Key: " << result << std::endl; // For debugging
 		return result;
-	}
-
-	void insert(const T& key) {
-		size_t keyIndex = findIndex(key);
-		insertByIndex(key, keyIndex);
-	}
-
-	bool remove(const T& key) {
-		size_t keyIndex = findIndex(key);
-		bool deletionResult = false;
-
-		if (keyIndex < currentSize) {
-			deletionResult = removeByIndex(key, keyIndex);
-		}
-		
-		return deletionResult;
 	}
 
 	bool splitRequired() {
@@ -148,14 +155,8 @@ public:
 		return (key == getKeyByIndex(indexOfKey));
 	}
 
-	//TODO: Check if this function is neccessary
 	bool isEmpty(void) {
 		return (currentSize == 0);
-	}
-
-	// TODO: Reconsider using this function
-	void setKeyByIndex(const T& newKey, size_t index) {
-		keys[index] = newKey;
 	}
 
 	void mergeWithOtherBKeyList(BKeyList* other) {
