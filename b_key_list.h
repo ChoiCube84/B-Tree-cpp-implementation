@@ -154,7 +154,14 @@ public:
 	
 	bool isExistingKey(const T& key) {
 		size_t indexOfKey = findIndex(key);
-		return (key == getKeyByIndex(indexOfKey));
+
+		// TODO: Revise this statement
+		if (indexOfKey < currentSize) {
+			return (key == getKeyByIndex(indexOfKey));
+		}
+		else {
+			return false;
+		}
 	}
 
 	bool isEmpty(void) {

@@ -237,7 +237,12 @@ private:
 		BNode* leftSibling = getLeftSibling();
 		BNode* rightSibling = getRightSibling();
 
-		if (leftSibling != nullptr && leftSibling->isExceedingNode()) {
+		// TODO: Check if checking if it is leaf node is neccessary
+
+		if (!isLeaf && isEmpty()) {
+			mergeWithSiblingNode();
+		}
+		else if (leftSibling != nullptr && leftSibling->isExceedingNode()) {
 			rightRotation();
 		}
 		else if (rightSibling != nullptr && rightSibling->isExceedingNode()) {
@@ -342,7 +347,8 @@ private:
 		leftChildNode->keys->insert(separator);
 
 		leftChildNode->keys->mergeWithOtherBKeyList(rightChildNode->keys);
-		for (size_t i = keys->getCurrentSize() + 1; i > separatorIndex + 1; i--) {
+		
+		for (size_t i = separatorIndex + 2; i < keys->getCurrentSize() + 2; i++) {
 			BNode* childToShift = getChildByIndex(i);
 			setChildByIndex(childToShift, i - 1);
 		}

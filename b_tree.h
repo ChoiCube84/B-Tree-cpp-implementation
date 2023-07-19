@@ -16,6 +16,16 @@ public:
 private:
 	BNode<T>* root;
 
+	void destructorHelper(BNode<T>* currentNode) {
+		if (!currentNode->isLeaf) {
+			for (size_t i = 0; i < currentNode->getCurrentSize(); i++) {
+				BNode<T>* child = currentNode->getChildByIndex(i);
+				destructorHelper(child);
+			}
+		}
+		delete currentNode;
+	}
+
 public:
 	BTree(size_t order) : order(order), root(new BNode<T>(order, true)) {
 	}
@@ -65,16 +75,6 @@ public:
 	}
 
 private:
-	void destructorHelper(BNode<T>* currentNode) {
-		if (!currentNode->isLeaf) {
-			for (size_t i = 0; i < currentNode->getCurrentSize(); i++) {
-				BNode<T>* child = currentNode->getChildByIndex(i);
-				destructorHelper(child);
-			}
-		}
-		delete currentNode;
-	}
-
 	void traverseChildNode(
 		std::stringstream& ss, 
 		std::function<void(std::stringstream&, BNode<T>*, bool)> orderType,
