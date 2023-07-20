@@ -233,16 +233,12 @@ private:
 		}
 	}
 
+	// TODO: This function is suspicious
 	void rebalance(void) {
 		BNode* leftSibling = getLeftSibling();
 		BNode* rightSibling = getRightSibling();
 
-		// TODO: Check if checking if it is leaf node is neccessary
-
-		if (!isLeaf && isEmpty()) {
-			mergeWithSiblingNode();
-		}
-		else if (leftSibling != nullptr && leftSibling->isExceedingNode()) {
+		if (leftSibling != nullptr && leftSibling->isExceedingNode()) {
 			rightRotation();
 		}
 		else if (rightSibling != nullptr && rightSibling->isExceedingNode()) {
@@ -300,6 +296,16 @@ private:
 		T newSeparator = rightSibling->keys->getSmallestKey();
 		rightSibling->keys->remove(newSeparator);
 
+		if (!isLeaf) {
+			BNode* leftMostChildOfRightSibling = rightSibling->getLeftMostChild();
+			setChildByIndex(leftMostChildOfRightSibling, getCurrentSize());
+			for (size_t i = 0; i < rightSibling->getCurrentSize() + 1; i++) {
+				BNode* childToShift = rightSibling->getChildByIndex(i + 1);
+				rightSibling->setChildByIndex(childToShift, i);
+			}
+			rightSibling->setChildByIndex(nullptr, rightSibling->getCurrentSize()); // TODO: Check if this line is neccessary
+		}
+		
 		parent->keys->remove(oldSeparator);
 		parent->keys->insert(newSeparator);
 	}
@@ -313,6 +319,21 @@ private:
 		BNode* leftSibling = getLeftSibling();
 		T newSeparator = leftSibling->keys->getLargestKey();
 		leftSibling->keys->remove(newSeparator);
+
+		if (!isLeaf) {
+			BNode* rightMostChildOfLeftSibling = leftSibling->getRightMostChild();
+			for (size_t i = getCurrentSize() - 1; i > 0; i--) {
+				BNode* childToShift = leftSibling->getChildByIndex(i);
+				leftSibling->setChildByIndex(childToShift, i + 1);
+			}
+
+			// Added these two lines because of range of size_t
+			BNode* childToShift = leftSibling->getChildByIndex(0);
+			leftSibling->setChildByIndex(childToShift, 1);
+
+			setChildByIndex(rightMostChildOfLeftSibling, 0);
+			leftSibling->setChildByIndex(nullptr, leftSibling->getCurrentSize()); // TODO: Check if this line is neccessary
+		}
 
 		parent->keys->remove(oldSeparator);
 		parent->keys->insert(newSeparator);
