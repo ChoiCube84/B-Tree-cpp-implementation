@@ -14,19 +14,18 @@ void insertAndPrint(BKeyList<T>* list, T key);
 template <typename T>
 void deleteAndPrint(BKeyList<T>* list, T key);
 template <typename T>
-void insertAndPrint(BTree<T>* tree, T key);
+void insertAndPrint(BTree<T>* tree, T key, bool print);
 template <typename T>
-void deleteAndPrint(BTree<T>* tree, T key);
+void deleteAndPrint(BTree<T>* tree, T key, bool print);
 
 void BKeyListTest(void);
-void BTreeTest(void);
+void BTreeTest(bool print);
 void RandomBTreeTest(bool print);
 
 int main(void) {
 	// BKeyListTest();
-	// BNodeTest();
-	BTreeTest();
-	// RandomBTreeTest(false);
+	// BTreeTest(true);
+	RandomBTreeTest(false);
 
 	return 0;
 }
@@ -57,27 +56,34 @@ void deleteAndPrint(BKeyList<T>* list, T key) {
 }
 
 template <typename T>
-void insertAndPrint(BTree<T>* tree, T key) {
-	cout << "Before Insert (" << key << ") : " << tree->preOrder(true) << endl;
+void insertAndPrint(BTree<T>* tree, T key, bool print) {
+	if (print) cout << "Before Insert (" << key << ") : " << tree->preOrder(true) << endl;
 	tree->insert(key);
-	cout << "After Insert (" << key << ") : " << tree->preOrder(true) << endl;
-	cout << endl;
+	if (print) {
+		cout << "After Insert (" << key << ") : " << tree->preOrder(true) << endl;
+		cout << endl;
+	}
 }
 
 template <typename T>
-void deleteAndPrint(BTree<T>* tree, T key) {
-	cout << "Before deletion (" << key << ") : " << tree->preOrder(true) << endl;
+void deleteAndPrint(BTree<T>* tree, T key, bool print) {
+	if (print) cout << "Before deletion (" << key << ") : " << tree->preOrder(true) << endl;
 
 	bool deletionSuccess = tree->remove(key);
-	if (deletionSuccess) {
-		std::cout << "Deletion Success" << std::endl;
+	
+	if (print) {
+		if (deletionSuccess) {
+			std::cout << "Deletion Success" << std::endl;
+		}
+		else {
+			std::cout << "Deletion Failed" << std::endl;
+		}
 	}
-	else {
-		std::cout << "Deletion Failed" << std::endl;
-	}
-
-	cout << "After deletion (" << key << ") : " << tree->preOrder(true) << endl;
-	cout << endl;
+	
+	if (print) {
+		cout << "After deletion (" << key << ") : " << tree->preOrder(true) << endl;
+		cout << endl;
+	}	
 }
 
 void BKeyListTest(void) {
@@ -110,23 +116,23 @@ void BKeyListTest(void) {
 	delete first;
 }
 
-void BTreeTest(void) {
-	BTree<int>* tree = new BTree<int>(5);
+void BTreeTest(bool print) {
+	BTree<int>* tree = new BTree<int>(3);
 	vector<int> keys;
 
 	cout << "========== Insert test start ==========" << endl;
-	keys = { 5003, 6072, 3462, 4435, 5497, 9870, 5346, 8118, 2812, 3598, 4703, 1856, 7733, 6252, 9125, 7921, 4500, 3301, 5416, 7451, 7263, 3812, 5934, 2965, 3622 };
+	keys = { 7155, 8120, 6557, 1275, 2773, 4782, 2806, 7294, 9073 };
 	for (auto i : keys) {
-		insertAndPrint<int>(tree, i);
+		insertAndPrint<int>(tree, i, print);
 	}
 	cout << "========== Insert test done! ==========" << endl;
 
 	cout << endl;
 
 	cout << "========== Delete test start ==========" << endl;
-	keys = { 9870, 6252, 6072, 8118, 5497, 3598, 7451, 2812, 5346, 2965, 4500, 7263, 3812, 5003, 4435, 3622, 7733, 3301, 9125, 1856, 3462, 7921, 5934, 4703, 5416 };
+	keys = { 1275, 9073, 2806, 6557, 2773, 7294, 8120, 7155, 4782 };
 	for (auto i : keys) {
-		deleteAndPrint<int>(tree, i);
+		deleteAndPrint<int>(tree, i, print);
 	}
 	cout << "========== Delete test done! ==========" << endl;
 
@@ -137,22 +143,22 @@ void BTreeTest(void) {
 
 void RandomBTreeTest(bool print) {
 	unsigned int success = 0;
-	unsigned int objective = 100000;
+	unsigned int objective = 1000;
 
 	std::random_device rd;
 	std::mt19937 gen(rd());
 
-	std::uniform_int_distribution<int> randomOrder(3, 7);
+	std::uniform_int_distribution<int> randomOrder(3, 10);
 	std::uniform_int_distribution<int> randomKey(0, 9999);
-
+	std::uniform_int_distribution<int> randomDepth(2, 4);
+	
 	vector<int> keys;
 
 	while (success < objective) {
 		size_t order = static_cast<size_t>(randomOrder(gen));
-		order = 3; // TODO: delete this
 		BTree<int>* tree = new BTree<int>(order);
 		
-		int depth = 2;
+		int depth = randomDepth(gen);
 
 		for (size_t i = 0; i < pow(order, depth); i++) {
 			int key = randomKey(gen);
@@ -171,12 +177,7 @@ void RandomBTreeTest(bool print) {
 
 		if (print) cout << "========== Insert test start ==========" << endl;
 		for (auto i : keys) {
-			if (print) {
-				insertAndPrint(tree, i);
-			}
-			else {
-				tree->insert(i);
-			}
+			insertAndPrint(tree, i, print);
 		}
 		if (print) cout << "========== Insert test done! ==========" << endl;
 
@@ -195,12 +196,7 @@ void RandomBTreeTest(bool print) {
 
 		if (print) cout << "========== Delete test start ==========" << endl;
 		for (auto i : keys) {
-			if (print) {
-				deleteAndPrint(tree, i);
-			}
-			else {
-				tree->remove(i);
-			}
+			deleteAndPrint(tree, i, print);
 		}
 		if (print) cout << "========== Delete test done! ==========" << endl;
 
@@ -209,7 +205,7 @@ void RandomBTreeTest(bool print) {
 		keys.clear();
 		success++;
 
-		if (print) cout << "Test " << success << " success! (order: " << order << ")" << endl;
+		cout << "Test " << success << " success! (order: " << order << ")" << endl;
 
 		if (print) cout << endl;
 

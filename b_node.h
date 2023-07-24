@@ -294,12 +294,12 @@ private:
 
 		BNode* rightSibling = getRightSibling();
 		T newSeparator = rightSibling->keys->getSmallestKey();
-		rightSibling->keys->remove(newSeparator);
 
 		if (!isLeaf) {
 			BNode* leftMostChildOfRightSibling = rightSibling->getLeftMostChild();
 			setChildByIndex(leftMostChildOfRightSibling, getCurrentSize());
-			for (size_t i = 0; i < rightSibling->getCurrentSize() + 1; i++) {
+
+			for (size_t i = 0; i < rightSibling->getCurrentSize(); i++) {
 				BNode* childToShift = rightSibling->getChildByIndex(i + 1);
 				rightSibling->setChildByIndex(childToShift, i);
 			}
@@ -308,6 +308,8 @@ private:
 		
 		parent->keys->remove(oldSeparator);
 		parent->keys->insert(newSeparator);
+
+		rightSibling->keys->remove(newSeparator);
 	}
 
 	void rightRotation(void) {
@@ -318,18 +320,17 @@ private:
 
 		BNode* leftSibling = getLeftSibling();
 		T newSeparator = leftSibling->keys->getLargestKey();
-		leftSibling->keys->remove(newSeparator);
 
 		if (!isLeaf) {
 			BNode* rightMostChildOfLeftSibling = leftSibling->getRightMostChild();
 			for (size_t i = getCurrentSize() - 1; i > 0; i--) {
-				BNode* childToShift = leftSibling->getChildByIndex(i);
-				leftSibling->setChildByIndex(childToShift, i + 1);
+				BNode* childToShift = getChildByIndex(i);
+				setChildByIndex(childToShift, i + 1);
 			}
 
 			// Added these two lines because of range of size_t
-			BNode* childToShift = leftSibling->getChildByIndex(0);
-			leftSibling->setChildByIndex(childToShift, 1);
+			BNode* childToShift = getChildByIndex(0);
+			setChildByIndex(childToShift, 1);
 
 			setChildByIndex(rightMostChildOfLeftSibling, 0);
 			leftSibling->setChildByIndex(nullptr, leftSibling->getCurrentSize()); // TODO: Check if this line is neccessary
@@ -337,6 +338,8 @@ private:
 
 		parent->keys->remove(oldSeparator);
 		parent->keys->insert(newSeparator);
+
+		leftSibling->keys->remove(newSeparator);
 	}
 
 	void mergeWithSiblingNode(void) {
