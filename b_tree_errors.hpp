@@ -10,12 +10,6 @@ public:
 	}
 };
 
-class InsertionFailure : public std::logic_error {
-public:
-	InsertionFailure(const std::string& message) : logic_error(message) {
-	}
-};
-
 class DeletionFailure : public std::logic_error {
 public:
 	DeletionFailure(const std::string& message) : logic_error(message) {

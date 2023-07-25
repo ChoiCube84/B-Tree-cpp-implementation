@@ -3,8 +3,8 @@
 #include <vector>
 #include <iostream>
 
-#include "b_tree.h"
-#include "custom_type.h"
+#include "b_tree.hpp"
+#include "custom_type.hpp"
 
 using namespace std;
 

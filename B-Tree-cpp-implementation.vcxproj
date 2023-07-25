@@ -124,12 +124,12 @@
     <ClCompile Include="test.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="b_key_list.h" />
-    <ClInclude Include="b_node.h" />
-    <ClInclude Include="b_tree.h" />
-    <ClInclude Include="b_tree_constraints.h" />
-    <ClInclude Include="b_tree_errors.h" />
-    <ClInclude Include="custom_type.h" />
+    <ClInclude Include="b_key_list.hpp" />
+    <ClInclude Include="b_node.hpp" />
+    <ClInclude Include="b_tree.hpp" />
+    <ClInclude Include="b_tree_constraints.hpp" />
+    <ClInclude Include="b_tree_errors.hpp" />
+    <ClInclude Include="custom_type.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

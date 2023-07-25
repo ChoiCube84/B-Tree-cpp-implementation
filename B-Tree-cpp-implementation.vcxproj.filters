@@ -20,22 +20,22 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="b_key_list.h">
+    <ClInclude Include="b_key_list.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="b_node.h">
+    <ClInclude Include="b_node.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="b_tree.h">
+    <ClInclude Include="b_tree.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="b_tree_errors.h">
+    <ClInclude Include="b_tree_errors.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="b_tree_constraints.h">
+    <ClInclude Include="b_tree_constraints.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="custom_type.h">
+    <ClInclude Include="custom_type.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

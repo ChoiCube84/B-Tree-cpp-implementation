@@ -3,8 +3,8 @@
 
 #include <string>
 
-#include "b_tree_constraints.h"
-#include "b_key_list.h"
+#include "b_tree_constraints.hpp"
+#include "b_key_list.hpp"
 
 template <UsableInBTree T>
 class BNode

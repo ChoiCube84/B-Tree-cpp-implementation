@@ -5,8 +5,8 @@
 #include <sstream>
 #include <functional>
 
-#include "b_tree_constraints.h"
-#include "b_node.h"
+#include "b_tree_constraints.hpp"
+#include "b_node.hpp"
 
 template <UsableInBTree T>
 class BTree

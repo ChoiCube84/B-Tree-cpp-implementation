@@ -5,7 +5,7 @@
 #include <sstream>
 #include <concepts>
 
-#include "b_tree_errors.h"
+#include "b_tree_errors.hpp"
 
 template<typename T>
 concept Comparable = requires (T a, T b) {

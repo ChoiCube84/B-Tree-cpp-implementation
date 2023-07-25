@@ -5,8 +5,8 @@
 #include <sstream>
 #include <stdexcept>
 
-#include "b_tree_errors.h"
-#include "b_tree_constraints.h"
+#include "b_tree_errors.hpp"
+#include "b_tree_constraints.hpp"
 
 template<UsableInBTree T>
 class BKeyList 
