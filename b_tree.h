@@ -5,9 +5,10 @@
 #include <sstream>
 #include <functional>
 
+#include "b_tree_constraints.h"
 #include "b_node.h"
 
-template <typename T>
+template <UsableInBTree T>
 class BTree
 {
 public:
@@ -25,9 +26,9 @@ private:
 		}
 		delete currentNode;
 	}
-
+	
 public:
-	BTree(size_t order) : order(order), root(new BNode<T>(order, true)) {
+	BTree(size_t order) : order(ensureValidOrder(order)), root(new BNode<T>(order, true)) {
 	}
 
 	~BTree() {
@@ -41,14 +42,12 @@ public:
 		}
 	}
 
-	bool remove(const T& key) {
-		bool deletionResult = root->remove(key);
+	void remove(const T& key) {
+		root->remove(key);
 
 		if (root->isEmpty()) {
 			root = root->replaceRootNode();
 		}
-
-		return deletionResult;
 	}
 
 	bool find(const T& key) {

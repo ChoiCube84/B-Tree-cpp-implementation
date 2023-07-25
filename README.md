@@ -12,7 +12,49 @@ This project is implemented using Object-Oriented Programming (OOP) in C++, ensu
 # Features
 The B Tree implementation supports the following operations:
 
-1. Insertion: Add keys into the B Tree while maintaining its properties. (Not Implemented Yet)
-2. Deletion: Remove keys from the B Tree while maintaining its properties. (Not Implemented Yet)
-3. Search: Find if a key exists in the B Tree. (Not Implemented Yet)
-4. Traversal: Traverse through the keys in the B Tree. (Not Implemented Yet)
+1. Insertion: Add keys into the B Tree while maintaining its properties.
+2. Deletion: Remove keys from the B Tree while maintaining its properties.
+3. Search: Find if a key exists in the B Tree.
+4. Traversal: Traverse through the keys in the B Tree.
+
+# Constraints for Type Usage with this B-Tree
+This B-Tree implementation is designed to handle a variety of data types. However, for correct operation and to prevent unexpected errors, the types you intend to use with this B-Tree must satisfy the following requirements:
+
+1. Comparison Operators: Your data type should support the `<`, `>`, `==`, and `!=` comparison operators. These operators are essential for maintaining the B-Tree's ordering properties and for performing operations like search and deletion.
+2. Deep Copying with Assignment Operator: Your data type should ensure deep copying when the `=` assignment operator is used. Shallow copies can lead to unexpected behaviors and bugs, especially when dealing with complex types.
+
+Please ensure your custom types fulfill these requirements before using them with this B-Tree implementation.
+
+# Getting Started
+To compile the project, you need to have a suitable C++ compiler installed on your system that supports C++20. Then, navigate to the project directory and run the following command:
+
+```bash
+g++ test.cpp -o test
+```
+
+To run the compiled program:
+
+```bash
+./test
+```
+
+# Usage Example
+Below is an example of how to use the B Tree implementation with integers:
+
+```cpp
+#include "b_tree.h"
+
+int main() {
+    BTree<int> tree(3); // Create a B Tree with order 3
+    
+    // Insert keys
+    tree.insert(1);
+    tree.insert(2);
+    tree.insert(3);
+    
+    // Search for a key
+    bool found = tree.search(2); // Returns true
+    
+    return 0;
+}
+```

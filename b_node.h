@@ -3,24 +3,25 @@
 
 #include <string>
 
+#include "b_tree_constraints.h"
 #include "b_key_list.h"
 
-template <typename T>
+template <UsableInBTree T>
 class BNode
 {
-public:
+public: // Public member variable
 	const size_t order;
 	const bool isLeaf;
 
-private:
+private: // Private member variable
 	size_t childIndex;
-	BNode* parent;
+	BNode* parent; 
 	BKeyList<T>* keys;
 	BNode** children;
-
-public:
+	
+public: // Public primary functions
 	BNode(size_t order, bool isLeaf = false) 
-		: order(order), childIndex(0), isLeaf(isLeaf), keys(new BKeyList<T>(order)), parent(nullptr), children(nullptr)
+		: order(ensureValidOrder(order)), isLeaf(isLeaf), childIndex(0), parent(nullptr), keys(new BKeyList<T>(order)), children(nullptr)
 	{
 		if (!isLeaf) {
 			children = new BNode*[order + 1];
@@ -52,7 +53,9 @@ public:
 		
 		if (splitRequired) {
 			T promotedKey = keys->getKeyByIndex(order / 2);
-			BNode* tail = splitTailNode();
+			
+			BNode* tail = new BNode(order, isLeaf);
+			splitBNode(tail);
 			
 			if (!hasParent()) {
 				makeNewRootNode(tail);
@@ -63,20 +66,19 @@ public:
 		}
 	}
 
-	bool remove(const T& key) {
-		bool deletionResult = false;
-
+	void remove(const T& key) {
 		if (isLeaf) {
-			deletionResult = keys->remove(key);
-
+			keys->remove(key);
+			
 			if (isDeficientNode()) {
 				rebalance();
 			}
 		}
 		else {
 			size_t indexOfKey = keys->findIndex(key);
+			bool isExistingkey = keys->search(key);
 
-			if (keys->isExistingKey(key)) {
+			if (isExistingkey) {
 				BNode* leftChildOfKey = getChildByIndex(indexOfKey);
 				BNode* rightChildOfKey = getChildByIndex(indexOfKey + 1);
 
@@ -98,16 +100,14 @@ public:
 				keys->remove(key);
 				keys->insert(newSeparator);
 
-				deletionResult = selectedLeafNode->remove(newSeparator);
+				selectedLeafNode->remove(newSeparator);
 			}
 
 			else {
 				BNode* child = getChildByIndex(indexOfKey);
-				deletionResult = child->remove(key);
+				child->remove(key);
 			}
 		}
-
-		return deletionResult;
 	}
 
 	bool search(const T& key) {
@@ -129,7 +129,40 @@ public:
 		return keys->traverse();
 	}
 
-private:
+public: // Public helper functions
+	bool hasParent(void) {
+		return parent != nullptr;
+	}
+
+	bool isEmpty(void) {
+		return keys->isEmpty();
+	}
+
+	size_t getCurrentSize(void) {
+		return keys->getCurrentSize();
+	}
+
+	BNode* getParent(void) {
+		return parent;
+	}
+
+	BNode* getChildByIndex(size_t idx) {
+		return children[idx];
+	}
+
+	BNode* replaceRootNode(void) {
+		BNode* newRootNode = getLeftMostChild();
+
+		if (newRootNode == nullptr) {
+			newRootNode = new BNode(order, true);
+		}
+		newRootNode->parent = nullptr;
+
+		delete this;
+		return newRootNode;
+	}
+
+private: // Private helper functions
 	void setChildByIndex(BNode* child, size_t idx) {
 		if (child != nullptr) {
 			child->parent = this;
@@ -139,22 +172,21 @@ private:
 		children[idx] = child;
 	}
 
-	BNode* splitTailNode(void) {
-		BNode* tail = new BNode(order, isLeaf);
-
+	void splitBNode(BNode* tail) {
 		tail->childIndex = childIndex + 1;
-		tail->keys = keys->split();
+		
+		tail->keys = new BKeyList<T>(order);
+		keys->splitBKeyList(tail->keys);
+		
 		tail->parent = parent;
 
-		if (!tail->isLeaf) {
+		if (!isLeaf) {
 			tail->children = new BNode * [order + 1];
 			for (size_t i = 0; i < order + 1; i++) {
 				tail->setChildByIndex(nullptr, i);
 			}
 			passChildrenToTailNode(tail);
 		}
-
-		return tail;
 	}
 
 	void passChildrenToTailNode(BNode* tail) {
@@ -180,12 +212,20 @@ private:
 	void connectTailNodeToParentNode(BNode* tail, T& promotedKey) {
 		size_t indexOfPromotedKey = parent->keys->findIndex(promotedKey);
 
-		parent->shiftChildren(indexOfPromotedKey);
+		parent->shiftChildrenToRight(indexOfPromotedKey + 1);
 		parent->setChildByIndex(tail, indexOfPromotedKey + 1);
 	}
 
-	void shiftChildren(size_t indexOfPromotedKey) {
-		for (size_t i = keys->getCurrentSize(); i > indexOfPromotedKey + 1; i--) {
+	void shiftChildrenToLeft(size_t indexToBegin) {
+		for (size_t i = indexToBegin; i < getCurrentSize(); i++) {
+			BNode* childToShift = getChildByIndex(i + 1);
+			setChildByIndex(childToShift, i);
+		}
+		setChildByIndex(nullptr, getCurrentSize());
+	}
+
+	void shiftChildrenToRight(size_t indexToBegin) {
+		for (size_t i = getCurrentSize(); i > indexToBegin; i--) {
 			BNode* childToShift = getChildByIndex(i - 1);
 			setChildByIndex(childToShift, i);
 		}
@@ -229,11 +269,10 @@ private:
 			return nullptr;
 		}
 		else {
-			return children[keys->getCurrentSize()];
+			return children[getCurrentSize()];
 		}
 	}
 
-	// TODO: This function is suspicious
 	void rebalance(void) {
 		BNode* leftSibling = getLeftSibling();
 		BNode* rightSibling = getRightSibling();
@@ -254,7 +293,7 @@ private:
 			return false;
 		}
 		else {
-			size_t numberOfChildrenNodes = keys->getCurrentSize() + 1;
+			size_t numberOfChildrenNodes = getCurrentSize() + 1;
 			size_t minimumNumberOfRequiredKeys = (order + 1) / 2;
 
 			return numberOfChildrenNodes < minimumNumberOfRequiredKeys;
@@ -262,7 +301,7 @@ private:
 	}
 
 	bool isExceedingNode(void) {
-		size_t numberOfChildrenNodes = keys->getCurrentSize() + 1;
+		size_t numberOfChildrenNodes = getCurrentSize() + 1;
 		size_t minimumNumberOfRequiredKeys = (order + 1) / 2;
 
 		return numberOfChildrenNodes > minimumNumberOfRequiredKeys;
@@ -278,7 +317,7 @@ private:
 	}
 
 	BNode* getRightSibling(void) {
-		if (childIndex == parent->keys->getCurrentSize()) {
+		if (childIndex == parent->getCurrentSize()) {
 			return nullptr;
 		}
 		else {
@@ -298,12 +337,7 @@ private:
 		if (!isLeaf) {
 			BNode* leftMostChildOfRightSibling = rightSibling->getLeftMostChild();
 			setChildByIndex(leftMostChildOfRightSibling, getCurrentSize());
-
-			for (size_t i = 0; i < rightSibling->getCurrentSize(); i++) {
-				BNode* childToShift = rightSibling->getChildByIndex(i + 1);
-				rightSibling->setChildByIndex(childToShift, i);
-			}
-			rightSibling->setChildByIndex(nullptr, rightSibling->getCurrentSize()); // TODO: Check if this line is neccessary
+			rightSibling->shiftChildrenToLeft(0);
 		}
 		
 		parent->keys->remove(oldSeparator);
@@ -323,17 +357,11 @@ private:
 
 		if (!isLeaf) {
 			BNode* rightMostChildOfLeftSibling = leftSibling->getRightMostChild();
-			for (size_t i = getCurrentSize() - 1; i > 0; i--) {
-				BNode* childToShift = getChildByIndex(i);
-				setChildByIndex(childToShift, i + 1);
-			}
-
-			// Added these two lines because of range of size_t
-			BNode* childToShift = getChildByIndex(0);
-			setChildByIndex(childToShift, 1);
-
+			
+			shiftChildrenToRight(0);
 			setChildByIndex(rightMostChildOfLeftSibling, 0);
-			leftSibling->setChildByIndex(nullptr, leftSibling->getCurrentSize()); // TODO: Check if this line is neccessary
+			
+			leftSibling->setChildByIndex(nullptr, leftSibling->getCurrentSize());
 		}
 
 		parent->keys->remove(oldSeparator);
@@ -345,7 +373,7 @@ private:
 	void mergeWithSiblingNode(void) {
 		size_t separatorIndex = 0;
 
-		if (childIndex < parent->keys->getCurrentSize()) {
+		if (childIndex < parent->getCurrentSize()) {
 			separatorIndex = childIndex;
 		}
 		else {
@@ -362,17 +390,17 @@ private:
 		BNode* leftChildNode = getChildByIndex(leftChildNodeIndex);
 		BNode* rightChildNode = getChildByIndex(rightChildNodeIndex);
 
-		size_t numberOfChildrenOfLeftChildNode = leftChildNode->keys->getCurrentSize() + 1;
-		size_t numberOfChildrenOfRightChildNode = rightChildNode->keys->getCurrentSize() + 1;
+		size_t numberOfChildrenOfLeftChildNode = leftChildNode->getCurrentSize() + 1;
+		size_t numberOfChildrenOfRightChildNode = rightChildNode->getCurrentSize() + 1;
 
 		T separator = keys->getKeyByIndex(separatorIndex);
 
 		keys->remove(separator);
 		leftChildNode->keys->insert(separator);
 
-		leftChildNode->keys->mergeWithOtherBKeyList(rightChildNode->keys);
+		leftChildNode->keys->mergeBKeyList(rightChildNode->keys);
 		
-		for (size_t i = separatorIndex + 2; i < keys->getCurrentSize() + 2; i++) {
+		for (size_t i = separatorIndex + 2; i < getCurrentSize() + 2; i++) {
 			BNode* childToShift = getChildByIndex(i);
 			setChildByIndex(childToShift, i - 1);
 		}
@@ -392,39 +420,6 @@ private:
 		if (hasParent() && isDeficientNode()) {
 			rebalance();
 		}
-	}
-
-public:
-	bool hasParent(void) { 
-		return parent != nullptr; 
-	}
-
-	bool isEmpty(void) {
-		return keys->isEmpty();
-	}
-
-	size_t getCurrentSize(void) {
-		return keys->getCurrentSize();
-	}
-
-	BNode* getParent(void) { 
-		return parent; 
-	}
-
-	BNode* getChildByIndex(size_t idx) {
-		return children[idx];
-	}	
-
-	BNode* replaceRootNode(void) {
-		BNode* newRootNode = getLeftMostChild();
-
-		if (newRootNode == nullptr) {
-			newRootNode = new BNode(order, true);
-		}
-		newRootNode->parent = nullptr;
-
-		delete this;
-		return newRootNode;
 	}
 };
 

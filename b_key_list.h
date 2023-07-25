@@ -1,52 +1,25 @@
 #ifndef __B_KEY_LIST__
 #define __B_KEY_LIST__
 
-#include <iostream>
 #include <string>
 #include <sstream>
+#include <stdexcept>
 
-template<typename T>
+#include "b_tree_errors.h"
+#include "b_tree_constraints.h"
+
+template<UsableInBTree T>
 class BKeyList 
 {
-public:
+public: // Public member variable
 	const size_t order;
+	
+private: // Private member variable
+	T* keys;
 	size_t currentSize;
 
-private:
-	T* keys;
-
-	void insertByIndex(const T& key, size_t index) { 
-		if (currentSize < order) {
-			T prev = keys[index];
-
-			for (size_t i = index; i < currentSize; i++) {
-				swap<T>(prev, keys[i + 1]);
-			}
-
-			keys[index] = key;
-			currentSize++;
-		}
-	}
-
-	bool removeByIndex(const T& key, size_t index) {
-		if (keys[index] != key) {
-			return false;
-		}
-
-		else {
-			currentSize--;
-
-			for (size_t i = index; i < currentSize; i++) {
-				keys[i] = keys[i + 1];
-			}
-
-			return true;
-		}
-	}
-
-public:
-	
-	BKeyList(size_t order) : keys(new T[order]), order(order), currentSize(0) {
+public: // Public primary functions
+	BKeyList(size_t order) : order(ensureValidOrder(order)), currentSize(0), keys(new T[order]) {
 	}
 
 	~BKeyList() {
@@ -58,32 +31,40 @@ public:
 		insertByIndex(key, keyIndex);
 	}
 
-	bool remove(const T& key) {
+	void remove(const T& key) {
 		size_t keyIndex = findIndex(key);
-		bool deletionResult = false;
-
-		if (keyIndex < currentSize) {
-			deletionResult = removeByIndex(key, keyIndex);
-		}
-		
-		return deletionResult;
+		removeByIndex(key, keyIndex);
 	}
 
-	bool search(const T& key) {
+	const bool search(const T& key) const {
 		size_t indexOfKey = findIndex(key);
-		
-		if (key == getKeyByIndex(indexOfKey)) {
-			return true;
+		try {
+			return (key == getKeyByIndex(indexOfKey));
 		}
-		else {
+		catch (std::out_of_range&) {
 			return false;
 		}
 	}
 
-	size_t findIndex(const T& key) {
+	const std::string traverse() const {
+		std::stringstream ss;
+
+		for (size_t i = 0; i < currentSize; i++) {
+			if (i != 0) ss << " ";
+			ss << keys[i];
+		}
+
+		return ss.str();
+	}
+
+public: // Public helper functions
+	const size_t findIndex(const T& key) const {
 		size_t result = 0;
 
-		if (currentSize > 0) {
+		if (currentSize == 0) {
+			return 0;
+		}
+		else {
 			size_t begin = 0;
 			size_t end = currentSize - 1;
 
@@ -101,39 +82,38 @@ public:
 
 			if (keys[end] < key)
 				result++;
-		}
 
-		// std::cout << "Index of the Key: " << result << std::endl; // For debugging
-		return result;
+			return result;
+		}
 	}
 
-	bool splitRequired() {
+	const bool splitRequired() const {
 		return currentSize >= order; 
 	}
 
-	BKeyList* split() {
-		if (currentSize < order) return nullptr;
+	void splitBKeyList(BKeyList* tail) {
+		if (tail == nullptr) {
+			throw std::invalid_argument("The tail BKeyList is null");
+		}
+		else if (!tail->isEmpty()) {
+			throw std::invalid_argument("The tail BKeyList is not empty");
+		}
+		else if (currentSize < order) {
+			throw std::logic_error("There are not enough keys in the BKeyList");
+		}
 		else {
-			BKeyList* tail = new BKeyList(order);
-			
 			currentSize = order / 2;
 			for (size_t i = order / 2 + 1; i < order; i++) {
-				tail->insert(keys[i]);
+				tail->insertByIndex(keys[i], i - (order / 2 + 1));
 			}
-
-			return tail;
 		}
 	}
 
-	std::string traverse() {
-		std::stringstream ss;
-		
-		for (size_t i = 0; i < currentSize; i++) {
-			if (i != 0) ss << " ";
-			ss << keys[i];
+	void mergeBKeyList(BKeyList* other) {
+		for (size_t i = 0; i < other->currentSize; i++) {
+			T currentKey = other->getKeyByIndex(i);
+			insert(currentKey);
 		}
-
-		return ss.str();
 	}
 
 	const size_t getCurrentSize() const { 
@@ -141,37 +121,57 @@ public:
 	}
 
 	const T& getKeyByIndex(size_t index) const {
+		if (index >= currentSize) {
+			throw std::out_of_range("The index is out of range");
+		}
 		return keys[index];
 	}
 
 	const T& getSmallestKey(void) const {
+		if (currentSize == 0) {
+			throw EmptyBKeyList("The BKeyList is empty");
+		}
 		return keys[0];
 	}
 
 	const T& getLargestKey(void) const {
+		if (currentSize == 0) {
+			throw EmptyBKeyList("The BKeyList is empty");
+		}
 		return keys[currentSize - 1];
 	}
-	
-	bool isExistingKey(const T& key) {
-		size_t indexOfKey = findIndex(key);
 
-		// TODO: Revise this statement
-		if (indexOfKey < currentSize) {
-			return (key == getKeyByIndex(indexOfKey));
-		}
-		else {
-			return false;
-		}
-	}
-
-	bool isEmpty(void) {
+	const bool isEmpty(void) const {
 		return (currentSize == 0);
 	}
 
-	void mergeWithOtherBKeyList(BKeyList* other) {
-		for (size_t i = 0; i < other->getCurrentSize(); i++) {
-			T currentKey = other->getKeyByIndex(i);
-			insert(currentKey);
+private: // Private helper functions
+	void insertByIndex(const T& key, size_t index) {
+		if (currentSize >= order) {
+			throw InsertionFailure("Failed to insert the key");
+		}
+
+		for (size_t i = currentSize; i > index; i--) {
+			keys[i] = keys[i - 1];
+		}
+
+		keys[index] = key;
+		currentSize++;
+	}
+
+	void removeByIndex(const T& key, size_t index) {
+		if (index >= currentSize) {
+			throw std::out_of_range("The index is out of range");
+		}
+		else if (keys[index] != key) {
+			throw DeletionFailure("Failed to delete the key");
+		}
+		else {
+			currentSize--;
+
+			for (size_t i = index; i < currentSize; i++) {
+				keys[i] = keys[i + 1];
+			}
 		}
 	}
 };
