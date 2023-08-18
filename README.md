@@ -26,7 +26,11 @@ This B-Tree implementation is designed to handle a variety of data types. Howeve
 Please ensure your custom types fulfill these requirements before using them with this B-Tree implementation.
 
 # Getting Started
-To compile the project, you need to have a suitable C++ compiler installed on your system that supports C++20. Then, navigate to the project directory and run the following command:
+To compile the project, you need to have a suitable C++ compiler installed on your system that supports C++20. 
+
+(If you are planning to use the Python bindings in the future, please stay tuned for additional instructions on that.)
+
+Then, navigate to the project directory and run the following command:
 
 ```bash
 g++ test.cpp -o test
@@ -58,3 +62,6 @@ int main() {
     return 0;
 }
 ```
+
+# Future Work
+I am planning to extend the utility of this B-Tree implementation by enabling Python bindings. This would allow the high-speed benefits of C++ to be utilized directly in Python environments. Details on this integration and usage will be provided as the development progresses.
